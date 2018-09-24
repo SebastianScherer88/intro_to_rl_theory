@@ -1,0 +1,252 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{amsfonts} % for maths fonts
+\usepackage{amsmath} % for mathy text templates (propositions, theorems etc.)
+\usepackage{amsthm} % proof env
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% Math templates
+\newtheorem{prop}{Proposition}
+\newtheorem{lem}{Lemma}
+\newtheorem{cor}{Corollary}
+\newtheorem{thm}{Theorem}
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Introduction to RL: A mathematically rigorous reading companion}
+\author{Sebastian Scherer}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Why another introduction?}
+
+The goal of this work is to provide a mathematically rigorous introduction to RL theory based on the excellent book "Introduction to reinforcement learning" by Sutton and Bartos (first edition). While I greatly enjoyed reading this book and appreciated its focused approach on developing an intuition for the Q- and V-functions, the algorithms and the general probabilistic framework introduced in the early chapters, I couldn't help but stumble at some points wondering how exactly a particular claim was justified. When I tried to bridge these gaps, further gaps unravelled, sometimes turning into chasms that I simply could not bridge using the theory presented in this book alone. In short, my inner mathematician wasn't satisfied with the inconsistent level of rigour applied throughout these sections. Queries on stack exchange as well as the various alternative resources applying even less rigour and, often times, introducing additional confusing notation, motivated me to  try and remedy this myself. I therefore set out to try and rigorously formalize the theory presented, at least for the finite Markov Decicions Processes treated in the book, so that it may help let my inner mathematician sleep at night, as well as, and this is my sincere hope, provide a rigorous and helpful introduction for all those who are not only interested in the intuition but also appreciate a firm foundation on which to place it. The following manuscript can be used as an explanatory guide to the concepts presented in the book, or can be independently used as a rigourous introduction to value function theory in its own right.
+
+\section{Some notation}
+
+Like the reference book, we consider finite state, finite action markov decision processes ("finite MDPs"). As such, we denote by $S$ the set of states achievable for a given finite MDP, and by $A$ the set of executable actions $a$. We do not restrict ourselves to deterministic polices, and therefore treat a policy $\pi$ as a conditional probability distribution over the executable action set $A$, conditioned on a given current state from $S$. In other words, 
+
+\[
+	\begin{array}{llll}
+		\pi 	& : A \times S 	& \to 	& [0,1] \\
+			& (a,s)		& \mapsto	& \pi(a,s)
+	\end{array}
+\]
+
+where $\pi(a,s) = Pr_{\pi}(a | s)$ denotes the probability of choosing action $a \in A$ when in state $s \in S$ while acting according to policy $\pi$.
+
+We encode our knowledge about the (reactionary) nature of our environment via the transition probabilities
+
+\[
+	P_{s,s'}^{a} = Pr(s_{t+1} = s' | s_t = s, a_t = a)
+\]
+ 
+where $s,s' \in S$ and $a \in A$, denoting the probability of ending up in state $s'$ at $t+1$ when coming from state $s$ at $t$ by executing $a$, and 
+
+\[
+	R_{s,s'}^{a} = \mathbb{E}[r_t | s_t = s, s_{t+1} = s', a_t = a]
+\]
+
+denoting the expected reward at time $t$ due to ending up in state $s'$ at $t+1$ when coming from state $s$ at $t$ by executing $a$.
+
+Note that, in our notation, $s_t$ and $a_t$ denote the state and action at time $t$ respectively, and thus $r_t$ - NOT $r_{t+1}$ as in the book - denotes the reward obtained AFTER being in $s_t$ and executing $a_t$, thereby resulting in some (possibly the same) state $s_{t+1}$.
+
+We use the same symbol $\gamma \in (0,1)$ to denote the reward discount factor.
+
+Where deemed necessary, we will use expected values with policy indices, like $\mathbb{E}_{\pi}[\cdot]$, to clarify according to which distributions the specified expected value is to be viewed.
+
+\section{Value function and action-value function}
+
+As Sutton and Bartos point out, the standard approach to the analysis of optimal behaviour w.r.t a given MDP is by closely examining the value function $V^{\pi}$ and action value function $Q^{\pi}$ associated to a given policy $\pi$. They are an essential tool for quantitative analysis of policy driven behaviour, and thus, unsurprisingly, we will make heavy use of them throughout this guide. For a given policy $\pi$ on a finite MDP, we call
+
+\[
+	\begin{array}{llll}
+		V^{\pi} :	& S 	& \to 	& \mathbb{R} \\
+				& a	& \mapsto	& \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s]
+	\end{array}
+\]
+
+the \textit{value function} of $\pi$, and 
+
+\[
+	\begin{array}{llll}
+		Q^{\pi} : 	& A \times S 	& \to 	& \mathbb{R} \\
+				& (a,s)		& \mapsto	& \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s, a_t = a]
+	\end{array}
+\]
+
+the \textit{action-value} function of $\pi$. The general idea of $V^{\pi}$ is the quantification of the value a certain state $s$ possesses under $\pi$, by assigning it the expected cumulative reward obtained when starting in that state $s$ and then acting (i.e. choosing and exeucting actions) according to $\pi$. $Q^{\pi}$ does very much the same thing, except for pairs of states and actions $(a,s)$, assigning expected cumulative rewards when starting from $s$ via action $a$, and only \textit{then} acting according to $\pi$.
+
+\newpage
+
+Let us have a closer look at the recursive nature of these functions - a feature we will exploit throughout the rest of this transcript.
+
+\begin{prop}{(Parametrized bellman equations)}
+	Let $\pi$ be an arbitrary policy, and let $V^{\pi}$ and $Q^{\pi}$ its associated (action-)value functions. Then the following identities hold:
+	\begin{enumerate}
+		\item $V^{\pi}(s) = \sum_{a} \pi(s,a) \sum_{s'} P_{s,s'}^a ( R_{s,s'}^a + \gamma V^{\pi}(s') ) $
+		\item $Q^{\pi}(s,a) = \sum P_{s,s'}^a [ R_{s,s'}^a + \gamma \sum_{a'} \pi(s',a') Q^{\pi}(s',a') ] $
+	\end{enumerate}
+\end{prop}
+
+\begin{proof}
+	To prove the first identity consider
+	\[
+		\begin{array}{rl}
+			V^{\pi}(s)		& = \mathbb{E}_{\pi}[ \sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s]  \\
+						& = \mathbb{E}_{\pi}[r_t + \gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s]  \\
+						& = \mathbb{E}_{\pi}[r_t | s_t = s] + \mathbb{E}_{\pi}[\gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
+						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
+						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a \mathbb{E}_{\pi} [\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_{t+1} = s'] \\
+						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a (R_{s,s'}^a + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t'+k} | s_{t'} = s'] ) \\
+						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a (R_{s,s'}^a + \gamma V^{\pi}(s') ).
+		\end{array}
+	\]
+	Note how we used the transitional probabilities and expected rewards to explicitly write out the expected value of the cumulative reward $\sum_{k=0}		^{\infty} \gamma^k r_{t+k}$. Note also how we wrote $\mathbb{E}_{\pi}$ to indicate that the expected value is w.r.t to a sequence of actions $a_t, a_{t+1},\dots$ and states $s_t,s_{t+1},\dots$ resulting from acting according to $\pi$, made explicit in subsequent steps including the term $\pi(s,a)$.
+
+A similar line of thinking shows us that
+	\[
+		\begin{array}{rl}
+			Q^{\pi}(s,a)	& = \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s, a_t = a]  \\
+						& = \mathbb{E}_{\pi}[r_t + \gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a]  \\
+						& = \mathbb{E}_{\pi}[r_t | s_t = s, a_t = a] + \gamma \mathbb{E}_{\pi}[ \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a, s_{t+1} = s', a_{t+1} = a'] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_{t+1} = s', a_{t+1} = a'] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t'+k} | s_{t'} = s', a_{t'} = a'] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') Q^{\pi}(s',a') \\
+						& = \sum_{s'} P_{s,s'}^a ( R_{s,s'}^a + \gamma \sum_{a'} \pi(s,a') Q^{\pi}(s',a') )  \\
+		\end{array}
+	\]
+
+Note that we used the markov property which allowed us to drop past states and actions when going from line 4 to line 5.
+
+\end{proof}
+
+Note that, remembering the definitions of $P_{s,s'}^a$ and $R_{s,s'}^a$, these parametrizations can be rewritten in a slightly more compact way:
+
+$$ V^{\pi}(s) =  \mathbb{E}_{\pi}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s ] $$
+
+and 
+
+$$ Q^{\pi}(s) = \mathbb{E}_{\pi}[r_t + \gamma Q^{\pi}(s_{t+1},a_{t+1}) | s_t = s, a_t = a]. $$
+
+These are the 'standard' bellman equations.
+
+We now characterize the relationship between these two functions in the following
+
+\begin{prop}{(QV Relationships)}
+	Let $\pi$ be an arbitrary policy. Then the following identities hold:
+	\begin{enumerate}
+		\item $V^{\pi}(s) = \sum_a \pi(s,a) Q_{\pi}(s,a)$ \\
+		\item $V^{\pi}(s) = \sum_{a,s'}  \pi(s,a) P_{s,s'}^a [ R_{s,s'}^a + \pi(s',a') \gamma Q^{\pi}(s',a')] $ \\
+		\item $Q^{\pi}(s,a) = \sum_{s'} \pi(s,a) P_{s,s'}^a [ R_{s,s'}^a + \gamma V^{\pi}(s') ] $
+	\end{enumerate}
+\end{prop}
+
+\begin{proof}
+	To see that the first claims holds, we use the explicit distribution of taking an action $a$ when in state $s$ and following $\pi$ to see that indeed
+	\[
+		\begin{array}{rl}
+			V^{\pi}(s)		& =  \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s] \\
+						& =  \sum_a \pi(s,a) \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s, a_t = a] \\
+						& = \sum_a \pi(s,a) Q^{\pi}(s,a).
+		\end{array}
+	\]
+
+	For the second claim, following a similar line of argument as we have done for Proposition 1, we see that
+
+	\[
+		\begin{array}{rl}
+			V^{\pi}(s)		& = \mathbb{E}_{\pi}[r_t | s_t = s] + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
+						& = \sum_a \sum_{s'} \pi(s,a) P_{s,s'}^a R_{s,s'}^a \\
+						& + \sum_a \sum_{s'} \pi(s,a) P_{s,s'}^a \gamma  \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, s_{t+1} = s', a_{t+1} = a'] \\
+						& = \sum_a \sum_{s'} \pi(s,a) P_{s,s'}^a R_{s,s'}^a \\
+						& + \sum_a \sum_{s'} \pi(s,a) P_{s,s'}^a \gamma  \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t'+k} | s_{t'} = s', a_{t'} = a'] \\
+						& =  \sum_a \sum_{s'} \pi(s,a) P_{s,s'}^a ( R_{s,s'}^a + \gamma \sum_{a'} \pi(s',a') Q^{\pi}(s',a') ).
+		\end{array}
+	\]
+
+	The third equality uses the markov property. Lastly, we verify that
+
+	\[
+		\begin{array}{rl}
+			Q^{\pi}(s,a)  	& = \mathbb{E}_{\pi}[r_t | s_t = s, a_t = a] + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{r+1+k} | s_t = s, a_t = a, s_{t+1} = s'] \\
+						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{r'+k} | s_t' = s'] \\
+						& = \sum_{s'} P_{s,s'}^a ( R_{s,s'} + \gamma V^{\pi}(s') )
+		\end{array}
+	\]
+
+	completing the proof.
+
+\end{proof}
+
+\newpage
+
+As before we give the more compact versions of these identities:
+
+$$ V^{\pi}(s) =  \mathbb{E}_{\pi}[Q^{\pi}(s_{t},a_{t}) | s_t = s ], $$
+$$ V^{\pi}(s) =  \mathbb{E}_{\pi}[r_t + \gamma Q^{\pi}(s_{t+1},a_{t+1}) | s_t = s ] $$ and 
+$$ Q^{\pi}(s,a) = \mathbb{E}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s, a_t = a]. $$
+
+Note that the last identity's expected value is \textit{not} w.r.t $\pi$ - that's because there is nothing random left to be determined according to $\pi$. The state $s_t$ is given, the action $a_t$ specified and fixed, and the expected value of the next state $s_{t+1}$ is entirely dependent on how the environment reacts to this combination; and the term $V^{\pi}$ is a deterministic function. This implies that policies sharing the same $V$ also share the same $Q$. The reverse is not necessarily true. We formalize this realisation in the subsequent
+
+\begin{cor}
+	Let $\pi_1,\pi_2$ be two arbitrary policies such that $V^{\pi_1} \equiv V^{\pi_2}$. Then $Q^{\pi_1} \equiv Q^{\pi_2}$
+\end{cor}
+
+
+
+\end{document}
