@@ -197,7 +197,7 @@ We now characterize the relationship between these two functions in the followin
 \begin{prop}{(QV Relationships)}
 	Let $\pi$ be an arbitrary policy. Then the following identities hold:
 	\begin{enumerate}
-		\item $V^{\pi}(s) = \sum_a \pi(s,a) Q_{\pi}(s,a)$ \\
+		\item $V^{\pi}(s) = \sum_a \pi(s,a) Q^{\pi}(s,a)$ \\
 		\item $V^{\pi}(s) = \sum_{a,s'}  \pi(s,a) P_{s,s'}^a [ R_{s,s'}^a + \pi(s',a') \gamma Q^{\pi}(s',a')] $ \\
 		\item $Q^{\pi}(s,a) = \sum_{s'} P_{s,s'}^a [ R_{s,s'}^a + \gamma V^{\pi}(s') ] $
 	\end{enumerate}
@@ -405,18 +405,28 @@ This means that a \textit{greedy} policy might not be as shortsighted, and there
 
 Let us therefore have a closer look at a greedy policy's value function.
 
-\begin{lem}{(Greedy policy values)}
-	Let $\pi_g$ be a policy for a finite MDP and \textit{Q-greedy} w.r.t to some well-defined $Q$ function. Then $$V^{\pi_g} \equiv max_{a \in A} Q(\cdot,a).$$
-\end{lem}
+\begin{cor}{(Greedy policy values)}
+	Let $\pi_g$ be a \textit{greedy} policy for a finite MDP. Then $$V^{\pi_g} \equiv max_{a \in A} Q^{\pi_g}(\cdot,a).$$
+\end{cor}
 
 \begin{proof}
+	We write for any fixed but arbitrary $s \in S$
+	\[
+		\begin{array}{rll}
+			V^{\pi_g}(s) 	& = 	& \sum_a \pi_g(s,a) Q^{\pi_g}(s,a) \\
+						& =	& \sum_{a \in maxact^{Q^{\pi_g}}} \pi_g(s,a) Q^{\pi_g}(s,a) \\
+						& = 	& \max_{a \in A} Q^{\pi_g}(s,a).
+		\end{array}
+	\]
 \end{proof}
 
-A direct consequence of this result is that any policy $\pi$ greedy w.r.t to its $own$ action-value function $Q^{\pi}$ satisfies $V^{\pi}(s) = max_{a \in A} Q^{\pi}(s,a)$ for all $s \in S$.
+In other words, a greedy policy's value function is just the maximum of its action-value function at the present state, taken over all possible actions. That is not surprising, seeing as maximising its own $Q$ function is what is driving a greedy policy as per definition.
 
-\begin{cor}{(Greedy policy improvement)}
-Let $\pi_g$ and $\pi_c$  be policies for finite MDP, and let $\pi_g$ be \textit{Q}$^{\pi_c}$\textit{-greedy}. If $\pi_c$ is \textit{Q}$^{\pi_c}$\textit{-greedy}, then $\pi_g =_V \pi_c$. Otherwise, $\pi_g >_V \pi_c$.
-\end{cor}
+The following result shows that any group of policies greedy w.r.t some $Q$ function are of the same quality. Unsurprisingly, the identical strategy of local maximisation does not lead to great deal of variability in policies' performances. It also shows that any policy that is not \textit{greedy} can be improved by making it \textit{greedy}.
+
+\begin{lem}{(Greedy policy improvement)}
+Let $\pi_g$ and $\pi_c$  be policies for finite MDP, and let $\pi_g$ be \textit{Q}$^{\pi_c}$\textit{-greedy}. If $\pi_c$ is \textit{Q}$^{\pi_c}$\textit{-greedy}, too, then $\pi_g =_V \pi_c$. Otherwise, $\pi_g >_V \pi_c$.
+\end{lem}
 
 \begin{proof}
 	Let $s \in S$ be fixed but arbitrary. We write
@@ -431,25 +441,24 @@ Let $\pi_g$ and $\pi_c$  be policies for finite MDP, and let $\pi_g$ be \textit{
 		\end{array}
 	\]
 
-	If $\pi_c$ is \textit{Q}$^{\pi_c}$\textit{-greedy}, then we have equality in the above chain for all $s \in S$ and the Improved Policy Improvement Theorem, 1., implies $\pi_g =_V \pi_c$. If $\pi_c$ is not \textit{Q}$^{\pi_c}$\textit{-greedy}, then we there is at least one $s \in S$ such that $>$ holds (and still $\ge$ for all other $s$). In that case the Improved Policy Improvement Theorem, 3., yields the desired claim.
+	If $\pi_c$ is \textit{Q}$^{\pi_c}$\textit{-greedy}, then we have equality in the above chain for all $s \in S$ and the Improved Policy Improvement Theorem, 1., implies $\pi_g =_V \pi_c$. If $\pi_c$ is not \textit{Q}$^{\pi_c}$\textit{-greedy}, then there is at least one $s \in S$ such that $>$ holds (and still $\ge$ for all other $s$). In that case the Improved Policy Improvement Theorem, 3., yields the desired claim.
 \end{proof}
 
-Inspecting the above proof we notice a couple of things:
+Inspecting the above proof we notice an important detail: Any deterministic policy that chooses an action from $maxact^{\pi_c}(s)$ given any state $s$ satisfies the condition of the corollary and thus is at least as good as (the potentially probabilistic) $\pi_c$. This means that for every probabilistic policy there is a deterministic policy that is at least as good, and it can be constructed explicitly by letting it choose any one action that maximises the probabilistic policy's action-value function.
 
-\begin{itemize}
-	\item Any deterministic policy that chooses an action from $maxact^{\pi_c}(s)$ given any state $s$ satisfies the condition of the corollary and thus is at least as good as (the potentially probabilistic) $\pi_c$. This means that for every probabilistic policy there is a deterministic policy that is at least as good, and it can be constructed explicitly by letting it choose action that maximise $Q^{\pi_c}(s,a)$. We say that such a policy is \textit{greedy} w.r.t to $Q^(s,a)$, because it makes its decisions based only on maximising that quantity.
-	\item If the $\ge$ sign is a strict inequality for any $s$, then $\pi_n$ then the condition for the Policy Improvement Theorem is met with a strict inequality. A closer look at the proof of the Theorem shows that then indeed $\pi_n$ is an actual improvement over $\pi_c$, i.e. there is an $s \in S$ for which we have $V^{\pi_n}(s) > V^{\pi_c}(s)$. In other words, when $\pi_c$ is \textit{non-greedy} w.r.t its own action-value function $Q^{\pi_c}$ by assigning non-zero probabilities to any $a \notin maxact^{\pi_c}$, we can construct a better (deterministic; see above point) policy.
-\end{itemize}
+\newpage
 
 \section{Optimal policies and how to find them}
 
-Now that we have a way of quantifying the \textit{goodness} of a policy, we can formally investigate the question of a \textit{best} policy. 
+In this section we will use our concept of policy comparison to formalize and analyse the concept of a \textit{best} policy. We will investigate existence, uniqueness and characterizations of such policies. We will mainly build on the previous sections results, but will at a later point be forced to introduce some usefull tools from functional analysis.
+
+With this road map in mind, let us start our journey ny clarifying what we mean by an \textit{optimal} or \textit{best} policy.
 
 \begin{defn}{(Optimal policy)}
-	Let $\pi_o$ be a policy for a finite MDP. We call $\pi_o$ an \textit{optimal policy} if and only if we have $$\pi_o \ge_{V} \pi$$ for all policies $\pi \in \Pi$.
+	Let $\pi^*$ be a policy for a finite MDP. We call $\pi^*$ an \textit{optimal policy} if and only if we have $$\pi^* \ge_{V} \pi$$ for all policies $\pi \in \Pi$.
 \end{defn}
 
-In other words, a policy $\pi_o$ whose value function $V^{\pi_o}$ dominates the value functions $V^{\pi}$ of all other policies is optimal for the given finite MDP, and what we consider 'best'. This approach seems sensible, since optimality of a policy according to the above definition maximises the expected cumulative reward (that is what a policy's value function represents).
+In other words, a policy $\pi^*$ whose value function $V^{\pi^*}$ dominates the value functions $V^{\pi}$ of all other policies is optimal for the given finite MDP, and what we consider 'best'. This approach seems sensible, since optimality of a policy according to the above definition maximises the expected cumulative reward (that is what a policy's value function represents).
 
 It is fair to say that most, if not all, of the subsequent results presented in this script deal with the analysis of optimal policies. In particular, we will formally answer the following questions:
 
@@ -459,5 +468,18 @@ It is fair to say that most, if not all, of the subsequent results presented in 
 	\item Can we give a constructive way of finding or at least approximating these optimal policies?
 \end{itemize}
 
+We first turn to the question of existence. Using a result that is equivalent to the infamous \textit{Axiom of Choice}, we are able to derive the following 
+
+\begin{prop}{(Optimal existence)}
+	For each finite MDP there exists at least one optimal (deterministic) policy.
+\end{prop}
+
+\begin{proof}
+	We will use Zorn's Lemma to prove the existence of an optimal deterministic policy, and then use results derived in the previous section to see that no probabilistic policy can outperform such a policy.
+
+	Zorn's Lemma states that any partially ordered set $(S, \le_S)$ in which every chain (i.e. set of elements $C \subset S$ that can be ordered such that $e_1 \le_S e_2 \le_S ... $) has an upper bound in $S$ (i.e. an $e_{upper} \in S$ such that $e \le_S e_{upper}$ for all $e \in S$) has a maximal element (i.e. an $e_{max_S} \in S$ such that if $e_{max_S} \le e$ for some $e \in S$ then $e = e_{max_S}$ must be true).
+
+We will define our partially ordered set as follows. Consider all value functions derived from deterministic policies, with the partial order $$V^{\pi_1} \le V^{\pi_2} \Leftrightarrow \pi_1 \le_V \pi_2.$$ Since for any finite MDP, there is only a finite number of deterministic policies, any chain in this partially ordered set is finite, and therefore has an upper bound - namely the last element of the chain. Zorn's Lemma now implies the existence of a deterministic policy $\pi^*$ and corresponding value function such that for any other deterministic policy $\pi$ with value function $V^{\pi}$ achieving $\pi^* \le_V \pi$ then $V^{\pi} \equiv V^{\pi^*}.$
+\end{proof}
 
 \end{document}
