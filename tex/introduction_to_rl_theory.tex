@@ -314,65 +314,63 @@ Another thing to note is that, if the policy $\pi_u$ is deterministic, our condi
 				& = & \mathbb{E}_{s_t ,a_t \sim (P_{s_t},\pi_u(s_t,\cdot))}[Q^{\pi_l}(s_t,a_t)].
 		\end{array}
 	\]
-	Let $s \in S$ be arbitrary but fixed. We then see that, by our assumption, the definition of the value function $V^{\pi}$, and Proposition 2, 3., we have
+
+	The second and main part of the proof will consist of showing the aforementioned policy improvement via prepending $\pi_l$ with $\pi_u$. Formally, this means that for any $s \in S$, $n = 1,2,...$ the inequality $$ V^{\pi_l}(s) \overset{!}{\le} \mathbb{E}_{\pi_u}\left[\sum_{k=0}^{n-1} \gamma^k r_{t+k} | s_t = s] + \gamma^n \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n}) | s_t = s\right] $$ holds. We will show this claim by induction over $n$.
+
+	For the induction start, let $s \in S$ be arbitrary but fixed. We then see that, by our assumption, the definition of the value function $V^{\pi}$, and Proposition 2, 3., we have
 	\[
 		\begin{array}{rll}
 			V^{\pi_l}(s) &	\le 	&	\mathbb{E}_{\pi_u}[Q^{\pi_l}(s_t,a_t) | s_t = s] \\
 						&	=	&	\sum_a \pi_u(s,a) Q^{\pi_l}(s,a) \\
 						&	=	&	\sum_a \pi_u(s,a) \mathbb{E}[r_t + \gamma V^{\pi_l}(s_{t+1}) | s_t = s, a_t = a]\\
 						&	= 	&	\mathbb{E}_{\pi_u}[r_t + \gamma V^{\pi_l}(s_{t+1}) | s_t = s] \\
-						&	=	&	\mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+1}) | s_t = s] \\
+						&	=	&	\mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+1}) | s_t = s], \\
 		\end{array}
 	\]
 
-	Remeber that the index $\pi_u$ denotes that any impliicit intermediate action $a$ was taken according to $\pi_u$. Let further $s_{t+k} \sim P_{s}^{k * \pi_u}$ denote the distribution for the state at $t+k$ given that the state at time $t$ was $s$ and the subsequent $k$ action(s) $a_t,\dots,a_{t+k-1}$ were chosen according to $\pi_u$. Then we can apply our expected value version of the initial assumption to see that
+	proving the claim for $n = 1$. Remember that the index $\pi_u$ denotes that any implicit intermediate action $a$ was taken according to $\pi_u$. 
+
+	For the induction step, let us introduce some additional notation. Let $s_{t+k} \sim P_{s}^{k * \pi_u}$ denote the distribution for the state at $t+k$ given that the state at time $t$ was $s$ and the subsequent $k$ action(s) $a_t,\dots,a_{t+k-1}$ were chosen according to $\pi_u$. Then we can apply our expected value version of the initial assumption to see that
 
 	\[
 		\begin{array}{rll}
-			& & \mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+1}) | s_t = s] \\
-			& = & \mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{s_{t+1} \sim P_s^{1 * \pi_u}}[V^{\pi_l}(s_{t+1})] \\
-			& \le &	\mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{s_{t+1},a_{t+1} \sim (P_s^{1 * \pi_u}, \pi_u(s_{t+1},\cdot))}[Q^{\pi_l}(s_{t+1},a_{t+1})] \\
+			V^{\pi_l}(s) & \overset{I.S.}{\le} & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s] + \gamma^{n-1} \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n-1}) | s_t = s] \\
+			& = & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s] + \gamma^{n-1} \mathbb{E}_{s_{t+n-1} \sim P_s^{(n-1)*\pi_u}}[V^{\pi_l}(s_{t+n-1})] \\
+			& \le & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s] \\
+			&  	& + \gamma^{n-1} \mathbb{E}_{(s_{t+n-1},a_{t+n-1}) \sim (P_s^{(n-1)*\pi_u},\pi_u(s_{t+n-1},\cdot)}[Q^{\pi_l}(s_{t+n-1},a_{t+n-1})] \\
 		\end{array}
 	\]
 
-	Applying Corollary 2 with $P_{s',a'} = (P_s^{1 * \pi_u}, \pi_u(s',\cdot))$  we arrive at
+	Applying Corollary 2 with $P_{s',a'} = (P_s^{1 * \pi_u}, \pi_u(s',\cdot))$  to the last expression in the above sequence, we arrive at
 	
 	\[
 		\begin{array}{rll}
-			& & \mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{s_{t+1},a_{t+1} \sim (P_s^{1 * \pi_u}, \pi_u(s_{t+1},\cdot))}[Q^{\pi_l}(s_{t+1},a_{t+1})] \\
-				 & = & \mathbb{E}_{\pi_u}[r_t | s_t = s] + \gamma \mathbb{E}_{s_{t+1},a_{t+1} \sim (P_s^{1 * \pi_u}, \pi_u(s_{t+1},\cdot))}[r_{t+1} + \gamma V^{\pi_l}(s_{t+2})] \\
-				 & = & \mathbb{E}_{\pi}[r_t | s_t = s] + \gamma \mathbb{E}_{\pi_u}[r_{t+1} + \gamma V^{\pi_l}(s_{t+2}) | s_t = s] \\
-				& = & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+2}) | s_t = s].
+		V^{\pi_l}(s) 	&	\le 	 & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s] \\
+					&		& + \gamma^{n-1} \mathbb{E}_{(s_{t+n-1},a_{t+n-1}) \sim (P_s^{(n-1)*\pi_u},\pi_u(s_{t+n-1},\cdot))}[r_{t+n-1} + \gamma V^{\pi_l}(s_{t+n})] \\
+				 & = & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s] \\
+				& 	& + \gamma^{n-1} \mathbb{E}_{\pi_u}[r_{t+n-1} + \gamma V^{\pi_l}(s_{t+n}) | s_t = s] \\
+				 & = & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-2} \gamma^k r_{t+k} | s_t = s]  + \mathbb{E}_{\pi_u}[\gamma^{n-1} r_{t+n-1} | s_t = s] \\
+				&	& + \gamma^n \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n}) | s_t = s] \\
+				& = & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n-1} \gamma^k r_{t+k} | s_t = s] + \gamma^n \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n}) | s_t = s],
 		\end{array}
 	\]
 
-	We do one more step to reiterate the feasability of this induction, and see that
-
-	\[
-		\begin{array}{rll}
-			& & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+2}) | s_t = s] \\
-			& & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{s_{t+2} \sim P_s^{2 * \pi_u}}[V^{\pi_l}(s_{t+2})] \\
-			& \le & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{s_{t+2},a_{t+2} \sim (P_s^{2 * \pi_u},\pi_u(s_{t+2},\cdot))} [Q^{\pi_l}(s_{t+2},a_{t+2})] \\
-			& = & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{s_{t+2},a_{t+2} \sim (P_s^{2 * \pi_u},\pi_u(s_{t+2},\cdot))} [r_{t+2} + \gamma V^{\pi_l}(s_{t+3})] \\
-			& = & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} | s_t = s] + \gamma^2 \mathbb{E}_{\pi_u} [r_{t+2} + \gamma V^{\pi_l}(s_{t+3}) | s_t = s] \\
-			& = & \mathbb{E}_{\pi_u}[r_t + \gamma r_{t+1} + \gamma^2 r_{t+2} | s_t = s] + \gamma^3 \mathbb{E}_{\pi_u} [V^{\pi_l}(s_{t+3}) | s_t = s] \\
-		\end{array}
-	\]
-
-	We have now established that, for any starting state $s$, it is more rewarding to take the first $n_a = 3$ actions according to $\pi_u$ 	before switching to $\pi_l$, than it is to immediately follow $\pi_l$ from the starting state $s$. Repeating our argument infintely many times, i.e. letting $n_a 	\rightarrow \infty$, we see that 
+	completing the induction step and proving the claim. Letting $n \rightarrow \infty$, we see that
 
 	\[
 		\begin{array}{rclcl}
-			V^{\pi_l}(s) & \le & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n_a-1} \gamma^k r_{t+k} | s_t = s] & + & \gamma^{n_a} \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+{n_a}}) | s_t = s ] \\
-						& \overset{n_a \rightarrow \infty}{\rightarrow } & V^{\pi_u}(s) & + & 0,
+			V^{\pi_l}(s) & \le & \mathbb{E}_{\pi_u}[\sum_{k=0}^{n} \gamma^k r_{t+k} | s_t = s] & + & \gamma^{n} \mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n}) | s_t = s ] \\
+						& \overset{n \rightarrow \infty}{\rightarrow } & V^{\pi_u}(s) & + & 0.
 		\end{array}
 	\]
 
-	where we have implicitly used that $$0 \le \gamma^{n_a}\mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n_a}) | s_t = s] \le \gamma^{n_a} \max_{s \in S} V^{\pi_l}(s) \overset{n_a \rightarrow \infty}{\rightarrow} 0.$$ Informally speaking, taking an infinite number of actions according to $\pi_u$ before switching to $\pi_l$ essentially means simply following $\pi_u$ and generates, independent of the starting state $s$, an expected cumulative reward that is at least as high as the one generated by simply following $\pi_l$. This proves the claim.
+	For the second term, we have implicitly used that $$0 \overset{\infty \leftarrow n}{\leftarrow} \min_{s \in S} V^{\pi_l}(s) \le \gamma^{n_a}\mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n_a}) | s_t = s] \le \gamma^{n_a} \max_{s \in S} V^{\pi_l}(s) \overset{n \rightarrow \infty}{\rightarrow} 0.$$ The convergence claim regarding the first term was proven in all generality for any policy $\pi$ in our earlier discussion of the value function $V^{\pi}$ and its properties.
+
+Informally speaking, taking an infinite number of actions according to $\pi_u$ before switching to $\pi_l$ essentially means simply following $\pi_u$ and generates, independent of the starting state $s$, an expected cumulative reward that is at least as high as the one generated by simply following $\pi_l$. This proves the theorem.
 
 \end{proof}
 
-The above theorem states that $\pi_u \ge_V \pi_l$ holds whenever $ \mathbb{E}_{a \sim \pi_u(s,\cdot )}[Q^{\pi_l}(s,a)] \ge V^{\pi_l}(s)$ for all $s \in S$. Then $\pi_u \ge_V \pi_l.$ Can we tweak these assumptions to guarantee actual improvement over $\pi_l$, i.e. $\pi_u >_V \pi_l$?
+The above theorem states that $\pi_u \ge_V \pi_l$ holds whenever $ \mathbb{E}_{a \sim \pi_u(s,\cdot )}[Q^{\pi_l}(s,a)] \ge V^{\pi_l}(s)$ for all $s \in S$, then $\pi_u \ge_V \pi_l.$ Can we tweak these assumptions to guarantee actual improvement over $\pi_l$, i.e. $\pi_u >_V \pi_l$?
 
 \begin{thm}{(Improved policy improvement theorem)}
 	Let $\pi_u, \pi_l$ be two different policies for a finite MDP.
