@@ -29,7 +29,7 @@
 \usepackage{amsfonts} % for maths fonts
 \usepackage{amsmath} % for mathy text templates (propositions, theorems etc.)
 \usepackage{amsthm} % proof env
-%\usepackage{unicode-math} % not in element character support
+\usepackage[hidelinks]{hyperref} % clickable, interactive references to equations, pages etc
 \usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
 \usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
 \usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
@@ -80,28 +80,34 @@ The goal of this work is to provide a mathematically rigorous introduction to RL
 
 Like the reference book, we consider finite state, finite action markov decision processes ("finite MDPs"). As such, we denote by $S$ the set of states achievable for a given finite MDP, and by $A$ the set of executable actions $a$. We do not restrict ourselves to deterministic polices, and therefore treat a policy $\pi$ as a conditional probability distribution over the executable action set $A$, conditioned on a given current state from $S$. In other words, 
 
-\[
-	\begin{array}{llll}
+\begin{equation}
+	\begin{array}{llll}\label{ar_polMap}
 		\pi 	& : A \times S 	& \to 	& [0,1] \\
 			& (a,s)		& \mapsto	& \pi(a,s)
 	\end{array}
-\]
+\end{equation}
 
 where $\pi(a,s) = Pr_{\pi}(a | s)$ denotes the probability of choosing action $a \in A$ when in state $s \in S$ while acting according to policy $\pi$.
 
 We encode our knowledge about the (reactionary) nature of our environment via the transition probabilities
 
-\[
+\begin{equation}\label{eq_transProb}
 	P_{s,s'}^{a} = Pr(s_{t+1} = s' | s_t = s, a_t = a)
-\]
+\end{equation}
  
 where $s,s' \in S$ and $a \in A$, denoting the probability of ending up in state $s'$ at $t+1$ when coming from state $s$ at $t$ by executing $a$, and 
 
-\[
+\begin{equation}\label{eq_rewExpVal}
 	R_{s,s'}^{a} = \mathbb{E}[r_t | s_t = s, s_{t+1} = s', a_t = a]
-\]
+\end{equation}
 
-denoting the expected reward at time $t$ due to ending up in state $s'$ at $t+1$ when coming from state $s$ at $t$ by executing $a$.
+denoting the expected reward at time $t$ due to ending up in state $s'$ at $t+1$ when coming from state $s$ at $t$ by executing $a$. For the remainder of this script, we will assume a uniform bound on rewards throughout all time steps, i.e. that 
+
+\begin{equation}\label{eq_rewBound}
+	-M \le r_t \le M
+\end{equation}
+
+for some $M \in \mathbb{R}$ and each $t \in 0,1,2,\dots $.
 
 Note that, in our notation, $s_t$ and $a_t$ denote the state and action at time $t$ respectively, and thus $r_t$ - NOT $r_{t+1}$ as in the book - denotes the reward obtained AFTER being in $s_t$ and executing $a_t$, thereby resulting in some (possibly the same) state $s_{t+1}$.
 
@@ -109,7 +115,13 @@ We use the same symbol $\gamma \in (0,1)$ to denote the reward discount factor.
 
 Finally, the most difficult notation to right \textit{and} consistent: expected values. We will use slightly different notations to indicate the various different underlying distriutions that govern the behaviour of the random variables involved, and w.r.t which the expected value needs to be viewed.
 
-If we are dealing with an implicit sequence of actions chosen according to one policy like $$s_t \overset{\pi}{\rightarrow} a_t \overset{P^{a_t}_{s_t,\cdot}}{\rightarrow} s_{t+1} \overset{\pi}{\rightarrow} a_{t+1} \overset{P^{a_{t+1}}_{s_{t+1},\cdot}}{\rightarrow} s_{t+1} \overset{\pi}{\rightarrow} \dots,$$ we will express this by writing $\mathbb{E}_{\pi}[\cdot]$. The contribution of the environment's state distribution $P^{a_t}_{s_t.\cdot}$ is implicit since we usually deal with one finite MDP at a time, thereby keeping this particular distribution constant throughout all of the proofs. An example of this is $$\mathbb{E}_{\pi}[r_t | s_t = s],$$ which implies action $a_t$ was taken according to $\pi$ having started at state $s$ at time $t$.
+If we are dealing with an implicit sequence of actions chosen according to one policy like 
+
+\begin{equation}\label{eq_trajIm}
+	s_t \overset{\pi}{\rightarrow} a_t \overset{P^{a_t}_{s_t,\cdot}}{\rightarrow} s_{t+1} \overset{\pi}{\rightarrow} a_{t+1} \overset{P^{a_{t+1}}_{s_{t+1},\cdot}}{\rightarrow} s_{t+1} \overset{\pi}{\rightarrow} \dots,
+\end{equation}
+
+we will express this by writing $\mathbb{E}_{\pi}[\cdot]$. The contribution of the environment's state distribution $P^{a_t}_{s_t.\cdot}$ is implicit since we usually deal with one finite MDP at a time, thereby keeping this particular distribution constant throughout all of the proofs. An example of this is $$\mathbb{E}_{\pi}[r_t | s_t = s],$$ which implies action $a_t$ was taken according to $\pi$ having started at state $s$ at time $t$.
 
 Therefore, if the random variable in question is only dependent on the environment's distribution, such as in the expression $$\mathbb{E}[r_t + \gamma f(s_{t+1}) | s_t = s, a_t = a]$$ (where $f$ is some deterministic function) we omit any index. Note that in this case both the immediate reward $r_t$ as well as the next time step's state $s_{t+1}$ are entirely dependent on the environment parameters $R^a_{s,s'}$ and $P^a_{s,s'}$, since we fixed the action $a_t$, thereby cutting any potential policy out of the loop.
 
@@ -119,25 +131,71 @@ In some cases, we will need to indicate the involved random variables' distribut
 
 As Sutton and Bartos point out, the standard approach to the analysis of optimal behaviour w.r.t a given MDP is by closely examining the value function $V^{\pi}$ and action value function $Q^{\pi}$ associated to a given policy $\pi$. They are an essential tool for quantitative analysis of policy driven behaviour, and thus, unsurprisingly, we will make heavy use of them throughout this guide. For a given policy $\pi$ on a finite MDP, we call
 
-\[
+\begin{equation}\label{ar_valFunc}
 	\begin{array}{llll}
 		V^{\pi} :	& S 	& \to 	& \mathbb{R} \\
 				& s	& \mapsto	& \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s]
 	\end{array}
-\]
+\end{equation}
 
 the \textit{value function} of $\pi$, and 
 
-\[
+\begin{equation}\label{ar_actValFunc}
 	\begin{array}{llll}
 		Q^{\pi} : 	& A \times S 	& \to 	& \mathbb{R} \\
 				& (a,s)		& \mapsto	& \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s, a_t = a]
 	\end{array}
-\]
+\end{equation}
 
 the \textit{action-value} function of $\pi$. The general idea of $V^{\pi}$ is the quantification of the value a certain state $s$ possesses under $\pi$, by assigning it the expected cumulative reward obtained when starting in that state $s$ and then acting (i.e. choosing and exeucting actions) according to $\pi$. $Q^{\pi}$ does very much the same thing, except for pairs of states and actions $(a,s)$, assigning expected cumulative rewards when starting from $s$ via action $a$, and only \textit{then} acting according to $\pi$.
 
-\newpage
+\subsection{Existence}
+
+In line with our rigorous approach so far, we dedicate this subsection to proving the well definedness of the above quantities. That is, we get assurances for:
+
+\begin{itemize}
+	\item the well definedness of the random variable defined by the series $G_t := \sum_{k=0}^{\infty}\gamma^k r_{t+k}$
+	\item the well definedness of its expected value, i.e. the well definedness of $V^{\pi}$
+	\item the well definedness of $Q^{\pi}$.
+\end{itemize}
+
+We start our quest with guaranteeing the well definedness of $G_t$. As a random variable that is the discounted infinite sum of random variables $r_{t+k}$, $k=0,1,\dots$, it maps sequences $\omega = (s_t, a_t, s_{t+1}, a_{t+1}, \dots ) $, with $s_t,s_{t+1},\dots S$, $a_t, a_{t+1},\dots A$ onto the set of real numbers $\mathbb{R}$. In other words, by denoting $\Omega$ as the set of all such sequences $\omega$, we consider $G_t$ to be
+
+\begin{equation}
+	\begin{array}{rlll}\label{ar_cumRew}
+		G_t: 	& \Omega 		& \rightarrow 	& \mathbb{R} \\
+			&	\omega	& \mapsto 	& \sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega)
+	\end{array}
+\end{equation}
+
+where $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \overset{!}{\in} \mathbb{R}$ remains to be shown to guarantee well definedness of this quantity as a (random variable) mapping. We will do so in the following
+
+\begin{prop}\label{prop_cumRewEx}
+	The random variable $G_t$ as defined in \ref{ar_cumRew} is well defined. In other words, the series $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega)$ is convergent for all $\omega \in \Omega$.
+\end{prop}
+
+\begin{proof}
+We will show that for any trajectory $\omega \in \Omega$ the sequence $G_t^n(\omega) := \sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \in \mathbb{R}$ is a cauchy sequence. Since $\mathbb{R}$ is complete, this will imply convergence of $G_t^n(\omega)$ in $\mathbb{R}$.
+
+Let w.l.o.g $n > m$ to see that
+
+	\begin{equation}\label{eq_cumRew1}
+		\left| G_t^n(\omega) - G_t^n(\omega)\right| = \left| \sum_{k=m}^n \gamma^k r_{t+k}(\omega) \right| \overset{\ref{eq_rewBound}}{\le} M \sum_{k=m}^n \gamma^k.
+	\end{equation}
+
+Since $s_n := \sum_{k=0}^n \gamma^k \overset{n \rightarrow \infty}{\rightarrow} \frac{1}{1-\gamma}$ and therefore cauchy, there exists for every $\hat{\epsilon}$ an $N_{\hat{\epsilon}}$ such that, if, $n,m \ge N_{\hat{\epsilon}}$, $\sum_{k=m}^n \gamma^k = |s_n - s_m| < \hat{\epsilon}$. If now $\epsilon >0$ is arbitrary but fixed, choose $\hat{\epsilon} = \frac{\epsilon}{M}$. Thus, for any $n,m > N_{\hat{\epsilon}}$, we have
+
+\begin{equation}\label{eq_cumRew2}
+	\left| G_t^n(\omega) - G_t^n(\omega)\right| \overset{\ref{eq_cumRew1}}{\le} M |s_n - s_m| < M \frac{\epsilon}{M} = \epsilon.
+\end{equation}
+
+Thus for any $\omega \in \Omega$, the sequence $G_t^n(\omega)$ is cauchy, and thus convergent on $\mathbb{R}$. This proves the claim.
+
+\end{proof}
+
+Now that the infinite discounted reward is a well defined random variable, we can sensibly pose the question regarding its expected value. Before we do so, however, let us have a look at the trajectory space $\Omega$ and consider why it is a countable, discrete set.
+
+\subsection{Basic properties}
 
 Let us have a closer look at the recursive nature of these functions - a feature we will exploit throughout the rest of this transcript.
 
@@ -283,6 +341,8 @@ Another useful result derived from the same identity is formalized in the below
 		\end{array}
 	\]
 \end{proof}
+
+\subsection{Comparing and improving}
 
 Now that we are a bit more comfortable with the concept of an (action-) value function, we can use it as a tool to quantify the \textit{quality} of a given policy. Intuitively, it makes sense to regard a policy $\pi_1$ that induces a higher expected reward when starting from a given state $s$ than, say, another policy $\pi_2$ as 'better'  - at least for that given state. In other words, it makes sense to regard $\pi_1$ as a better policy when starting from $s$ than $\pi_2$, if and only if $V^{\pi_1}(s) > V^{\pi_2}(s)$. Expanding this intuitive measure of comparison beyond a single state $s$ to \textit{all} elements of $S$, we arrive at the following natural
 
