@@ -175,7 +175,7 @@ where $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \overset{!}{\in} \mathbb{R}$
 \end{prop}
 
 \begin{proof}
-We will show that for any trajectory $\omega \in \Omega$ the sequence $G_t^n(\omega) := \sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \in \mathbb{R}$ is a cauchy sequence. Since $\mathbb{R}$ is complete, this will imply convergence of $G_t^n(\omega)$ in $\mathbb{R}$.
+We will show that for any trajectory $\omega \in \Omega$ the sequence $G_t^n(\omega) := \sum_{k=0}^{n} \gamma^k r_{t+k}(\omega) \in \mathbb{R}$ is a cauchy sequence. Since $\mathbb{R}$ is complete, this will imply convergence of $G_t^n(\omega)$ in $\mathbb{R}$.
 
 Let w.l.o.g $n > m$ to see that
 
@@ -186,7 +186,7 @@ Let w.l.o.g $n > m$ to see that
 Since $s_n := \sum_{k=0}^n \gamma^k \overset{n \rightarrow \infty}{\rightarrow} \frac{1}{1-\gamma}$ and therefore cauchy, there exists for every $\hat{\epsilon}$ an $N_{\hat{\epsilon}}$ such that, if, $n,m \ge N_{\hat{\epsilon}}$, $\sum_{k=m}^n \gamma^k = |s_n - s_m| < \hat{\epsilon}$. If now $\epsilon >0$ is arbitrary but fixed, choose $\hat{\epsilon} = \frac{\epsilon}{M}$. Thus, for any $n,m > N_{\hat{\epsilon}}$, we have
 
 \begin{equation}\label{eq_cumRew2}
-	\left| G_t^n(\omega) - G_t^n(\omega)\right| \overset{\ref{eq_cumRew1}}{\le} M |s_n - s_m| < M \frac{\epsilon}{M} = \epsilon.
+	\left|G_t^n(\omega) - G_t^n(\omega)\right| \overset{\ref{eq_cumRew1}}{\le} M |s_n - s_m| < M \frac{\epsilon}{M} = \epsilon.
 \end{equation}
 
 Thus for any $\omega \in \Omega$, the sequence $G_t^n(\omega)$ is cauchy, and thus convergent on $\mathbb{R}$. This proves the claim.
@@ -245,16 +245,51 @@ Having established the usefulness of this Lemma, let us finally prove it.
 	Given some trajectory distribution $P_{\Omega}$ on the (unordered) set $\Omega$, we need to show convergence of the series 
 
 \begin{equation}\label{eq_showConv}
-	\sum_{\omega \in \Omega} P_{\Omega}({\omega}) G_t(\omega)
+	\mathbb{E}_{\omega \sim P_{\Omega}}[G_t] = \sum_{\omega \in \Omega} P_{\Omega}({\omega}) G_t(\omega) < \infty
 \end{equation}
 
 \textit{regardless} of the particular ordering of the trajectories $\omega$. We do this by showing the convergence of this series' absolute series counterpart, namely
 
 \begin{equation}\label{eq_showAbsConv}
-	\sum_{\omega \in \Omega} | P_{\Omega}({\omega}) G_t(\omega) | \overset{P_\Omega(\omega) \ge 0}{=} \sum_{\omega \in \Omega} P_{\Omega}({\omega}) | G_t(\omega) | = \sum_{\omega_i} P_{\Omega}({\omega_i}) | G_t(\omega_i) |
+	\sum_{\omega \in \Omega} | P_{\Omega}({\omega}) G_t(\omega) | \overset{P_\Omega(\omega) \ge 0}{=} \sum_{\omega \in \Omega} P_{\Omega}({\omega}) | G_t(\omega) | = \sum_{i=1}^{\infty} P_{\Omega}({\omega_i}) | G_t(\omega_i) | < \infty
 \end{equation}
 
-for the \textit{one particular ordering} of $\Omega$ referred to earlier. The convergence of the absolute series in \ref{eq_showAbsConv} for one possible ordering of $\omega \in \Omega$ then guarantees the convergence of the series in $\ref{eq_showConv}$ for \textit{any} ordering of $\omega \in \Omega$ to the same limit according to the "Famous Reordering Series Convergence Theorem".
+for the \textit{one particular ordering} of $\Omega$ referred to earlier. The convergence of the absolute series in \ref{eq_showAbsConv} for one possible ordering of $\omega \in \Omega$ then guarantees the convergence of the series in $\ref{eq_showConv}$ for \textit{any} ordering of $\omega \in \Omega$ to the same limit according to the "Famous Reordering Series Convergence Theorem". To show that the absolute series converges, we show that the sequence
+
+\begin{equation}\label{eq_partSeq}
+	EG_{abs}^n := \sum_{i=1}^n |G_t(\omega_i)| P_\Omega(\omega_i) \overset{Prop \ref{prop_cumRewEx}}{<} \infty
+\end{equation}
+
+induced by its partial sum is a Cauchy sequence. W.lo.g, let $n>m$ to see that
+
+\begin{equation}\label{ar_cauchySeq}
+	\begin{array}{rcl}
+	\left| EG_{abs}^n - EG_{abs}^m \right| 	& = & \sum_{i=m}^n |G_t(\omega_i)| P_\Omega(\omega_i) \\ 
+									& = & \sum_{i=m}^n \underset{\overset{Prop \ref{prop_cumRewEx}}{< \infty}}{\left|\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega_i)\right|} P_\Omega(\omega_i) \\
+									& \le & \sum_{i=m}^n \left( \sum_{k=0}^{\infty} \gamma^k M \right) P_{\Omega}(\omega_i) \\
+									& = & \frac{M}{1 - \gamma} \sum_{i=m}^n  P_{\Omega}(\omega_i). \\
+	\end{array}
+\end{equation}
+
+Since $\sum_{i=0}^{\infty} P_{\Omega}(\omega_i) = 1$, the sequence of partial sums
+
+\begin{equation}
+	\hat{s}_n := \sum_{i=0}^n P_{\Omega}(\omega_i)
+\end{equation}
+
+is necessarily convergent and thus a Cauchy sequence. This means that for any $\hat{\epsilon} > 0$, we can find an $N_{\hat{\epsilon}} \in \mathbb{N}$ such that for all $n>m>N_{\hat{\epsilon}}$ we have 
+
+\begin{equation}\label{eq_partProbSeq}
+	\sum_{i=m}^n  P_{\Omega}(\omega_i) \overset{P_{\Omega}(\omega_i) \ge 0}{=} |\hat{s}_n - \hat{s}_m| < \hat{\epsilon}.
+\end{equation}
+
+Let $\epsilon >0$ be arbitrary but fixed. Choosing $\hat{\epsilon} = \epsilon \frac{1 - \gamma}{M}$ and $n>m>N_{\hat{\epsilon}}$, we indeed see that
+
+\begin{equation}
+	| EG_{abs}^n - EG_{abs}^m | \overset{\ref{ar_cauchySeq}}{\le} \frac{M}{1- \gamma} \sum_{i=m}^n P_{\Omega}(\omega_i) \overset{\ref{eq_partProbSeq}}{\le} \frac{M}{1 - \gamma} \hat{\epsilon} = \epsilon,
+\end{equation}
+
+proving that $(EG_{abs}^n)_n$ is indeed Cauchy and thus convergent in $\mathbb{R}$. This proves \ref{eq_showAbsConv} for the one ordering of $\Omega$ constructed, and thus \ref{eq_showConv} for \textit{any} ordering of $\omega \in \Omega$. This proves the Lemma.
 
 \end{proof}
 
