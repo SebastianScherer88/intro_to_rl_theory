@@ -171,7 +171,7 @@ We start our quest with guaranteeing the well definedness of $G_t$. As a random 
 where $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \overset{!}{\in} \mathbb{R}$ remains to be shown to guarantee well definedness of this quantity as a (random variable) mapping. We will do so in the following
 
 \begin{prop}\label{prop_cumRewEx}{(Cumulative rewards exist)}
-	The random variable $G_t$ as defined in \ref{ar_cumRew} is well defined. In other words, the series $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega)$ is convergent for all $\omega \in \Omega$.
+	The random variable $G_t$ as defined in \ref{ar_cumRew} is well defined. In other words, the series $G_t(\omega) = \sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega)$ is convergent for all $\omega \in \Omega$.
 \end{prop}
 
 \begin{proof}
@@ -190,6 +190,27 @@ Since $s_n := \sum_{k=0}^n \gamma^k \overset{n \rightarrow \infty}{\rightarrow} 
 \end{equation}
 
 Thus for any $\omega \in \Omega$, the sequence $G_t^n(\omega)$ is cauchy, and thus convergent on $\mathbb{R}$. This proves the claim.
+
+\end{proof}
+
+Having established $G_t(\omega) \in \mathbb{R}$, we can immediately see that it must be uniformly bounded on $\Omega$.
+
+\begin{cor}{(Cumulative rewards are bounded)}\label{cor_unifBoundCumRew}
+	The cumulative reward $G_t$ as defined in \ref{ar_cumRew} is uniformly bounded on $\Omega$. In particular, 
+
+	\begin{equation}\label{eq_boundCumRew}
+		|G_t(\omega)| < \frac{M}{1 - \gamma}
+	\end{equation}
+
+	for all $\omega \in \Omega$.
+\end{cor}
+
+\begin{proof}
+	Thanks to Prop \ref{prop_cumRewEx} we can justify writing
+
+\begin{equation}
+	|G_t(\omega)| = \left|\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \right| \le \sum_{k=0}^{\infty} \gamma^k |r_{t+k}(\omega)| \overset{\ref{eq_rewBound}}{=} M \sum_{k=0}^{\infty} \gamma^k = \frac{M}{1 - \gamma}.
+\end{equation}
 
 \end{proof}
 
@@ -265,9 +286,7 @@ induced by its partial sum is a Cauchy sequence. W.lo.g, let $n>m$ to see that
 \begin{equation}\label{ar_cauchySeq}
 	\begin{array}{rcl}
 	\left| EG_{abs}^n - EG_{abs}^m \right| 	& = & \sum_{i=m}^n |G_t(\omega_i)| P_\Omega(\omega_i) \\ 
-									& = & \sum_{i=m}^n \underset{\overset{Prop \ref{prop_cumRewEx}}{< \infty}}{\left|\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega_i)\right|} P_\Omega(\omega_i) \\
-									& \le & \sum_{i=m}^n \left( \sum_{k=0}^{\infty} \gamma^k M \right) P_{\Omega}(\omega_i) \\
-									& = & \frac{M}{1 - \gamma} \sum_{i=m}^n  P_{\Omega}(\omega_i). \\
+									& \overset{Cor \ref{cor_unifBoundCumRew}}{\le} & \frac{M}{1 - \gamma} \sum_{i=m}^n  P_{\Omega}(\omega_i). \\
 	\end{array}
 \end{equation}
 
