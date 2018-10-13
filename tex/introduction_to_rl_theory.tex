@@ -170,7 +170,7 @@ We start our quest with guaranteeing the well definedness of $G_t$. As a random 
 
 where $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega) \overset{!}{\in} \mathbb{R}$ remains to be shown to guarantee well definedness of this quantity as a (random variable) mapping. We will do so in the following
 
-\begin{prop}\label{prop_cumRewEx}
+\begin{prop}\label{prop_cumRewEx}{(Cumulative rewards exist)}
 	The random variable $G_t$ as defined in \ref{ar_cumRew} is well defined. In other words, the series $\sum_{k=0}^{\infty} \gamma^k r_{t+k}(\omega)$ is convergent for all $\omega \in \Omega$.
 \end{prop}
 
@@ -194,6 +194,69 @@ Thus for any $\omega \in \Omega$, the sequence $G_t^n(\omega)$ is cauchy, and th
 \end{proof}
 
 Now that the infinite discounted reward is a well defined random variable, we can sensibly pose the question regarding its expected value. Before we do so, however, let us have a look at the trajectory space $\Omega$ and consider why it is a countable, discrete set.
+
+Let us denote by $c_S = |S|, c_A = |A|$ the cardinality, i.e. size, of the state space $S$ and action space $A$, respectively. We can then order all possible trajectories in 
+
+\begin{equation}\label{def_traj}
+	\Omega = \{ \omega = (s_1, a_2, s_2, a_2, \dots) | s_i \in S, a_i \in A, i=1,2,\dots \}.
+\end{equation}
+
+To see such an ordering, refer to the appendix (? - still have to write this part). In particular, whenever we write $\omega_i$ for $i = 1,2,\dots$ or similar we mean the ordered $\omega \in \Omega$.
+
+We now establish the existence of the expected value of $G_t$.
+
+\begin{lem}\label{lem_expCumRew}{(Expected cumulative rewards exist, too)}
+	Let $P_\Omega$ be any trajectory distribution on the trajectory space $\Omega$. Then the expected value of the cumulative reward $G_t$ under that distribution is well defined and exists. In other words $\mathbb{E}_{\omega \sim P_{\Omega}}[G_t] < \infty$.
+\end{lem}
+
+Note that this is a pretty general statement about sufficient conditions for the existence of $G_t$'s expected value. It includes, for example, the cases were we act accoding to some policy $\pi$, starting from some random state $s$ distributed according to some random distribution $P_S$ on $S$. In particular, if that distribution is deterministic, i.e. if 
+
+\begin{equation}
+	P_{S,s'}(s) = 	\begin{cases}
+				1 & \text{ for } s = s' \\
+				0 & \text{ else}
+			\end{cases}
+\end{equation}
+
+we will have established the well-definedness of $V_{\pi}$ as defined in Definition \ref{ar_valFunc}, since that is what the value function, according to \ref{ar_valFunc}, measures. To see this, note that in such a case, $P_{\Omega} = P_{\Omega | s'}^{\pi} = P^{\pi} \circ P_{S,s'}$ is the distribution resulting from sampling a starting state $s$ according to $P_{S,s'}$, and then, given such a starting state, sampling a trajectory $\omega$ according to $\pi$. In such a case we have
+
+\begin{equation}
+	V^{\pi}(s') \overset{Def \ref{ar_valFunc}}{:=} \mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s\right] = \mathbb{E}_{P_\Omega}[G_t] \overset{Lem \ref{lem_expCumRew}}{<} \infty
+\end{equation}
+
+The analogous argument guaranteeing the well definedness of our action-value function $Q^{\pi}$ as defined in Definition \ref{ar_actValFunc}, uses a deterministic distribution $P_{S \times A, (s',a')}$ such that, for a fixed but arbitrarty pair $(s',a') \in S \times A$, 
+
+\begin{equation}
+	P_{S \times A,(s',a')}(s,a) = 	\begin{cases}
+				1 & \text{ for } (s,a) = (s',a') \\
+				0 & \text{ else}.
+			\end{cases}
+\end{equation}
+
+This leads to a composite trajectory distribution $P_{\Omega} = P_{\Omega | s',a'}^{\pi} = P^{\pi} \circ P_{S,(s',a')}$ resulting from sampling a starting state \textit{and} action $(s,a)$ according to $P_{S,(s',a')}$, and then, given such a starting state-action pair, sampling a trajectory $\omega$ according to $\pi$. This yields
+
+\begin{equation}
+	Q^{\pi}(s',a') \overset{Def \ref{ar_actValFunc}}{:= }\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s', a_t = a'\right] = \mathbb{E}_{P_\Omega}[G_t] \overset{Lem \ref{lem_expCumRew}}{<} \infty.
+\end{equation}
+
+Having established the usefulness of this Lemma, let us finally prove it.
+
+\begin{proof}{(of Lemma \ref{lem_expCumRew})}
+	Given some trajectory distribution $P_{\Omega}$ on the (unordered) set $\Omega$, we need to show convergence of the series 
+
+\begin{equation}\label{eq_showConv}
+	\sum_{\omega \in \Omega} P_{\Omega}({\omega}) G_t(\omega)
+\end{equation}
+
+\textit{regardless} of the particular ordering of the trajectories $\omega$. We do this by showing the convergence of this series' absolute series counterpart, namely
+
+\begin{equation}\label{eq_showAbsConv}
+	\sum_{\omega \in \Omega} | P_{\Omega}({\omega}) G_t(\omega) | \overset{P_\Omega(\omega) \ge 0}{=} \sum_{\omega \in \Omega} P_{\Omega}({\omega}) | G_t(\omega) | = \sum_{\omega_i} P_{\Omega}({\omega_i}) | G_t(\omega_i) |
+\end{equation}
+
+for the \textit{one particular ordering} of $\Omega$ referred to earlier. The convergence of the absolute series in \ref{eq_showAbsConv} for one possible ordering of $\omega \in \Omega$ then guarantees the convergence of the series in $\ref{eq_showConv}$ for \textit{any} ordering of $\omega \in \Omega$ to the same limit according to the "Famous Reordering Series Convergence Theorem".
+
+\end{proof}
 
 \subsection{Basic properties}
 
