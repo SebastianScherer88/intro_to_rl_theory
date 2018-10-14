@@ -232,7 +232,7 @@ We now establish the existence of the expected value of $G_t$.
 
 Note that this is a pretty general statement about sufficient conditions for the existence of $G_t$'s expected value. It includes, for example, the cases were we act accoding to some policy $\pi$, starting from some random state $s$ distributed according to some random distribution $P_S$ on $S$. In particular, if that distribution is deterministic, i.e. if 
 
-\begin{equation}
+\begin{equation}\label{eq_detStateDist}
 	P_{S,s'}(s) = 	\begin{cases}
 				1 & \text{ for } s = s' \\
 				0 & \text{ else}
@@ -241,13 +241,13 @@ Note that this is a pretty general statement about sufficient conditions for the
 
 we will have established the well-definedness of $V_{\pi}$ as defined in Definition \ref{ar_valFunc}, since that is what the value function, according to \ref{ar_valFunc}, measures. To see this, note that in such a case, $P_{\Omega} = P_{\Omega | s'}^{\pi} = P^{\pi} \circ P_{S,s'}$ is the distribution resulting from sampling a starting state $s$ according to $P_{S,s'}$, and then, given such a starting state, sampling a trajectory $\omega$ according to $\pi$. In such a case we have
 
-\begin{equation}
+\begin{equation}\label{eq_finiteValFunc}
 	V^{\pi}(s') \overset{Def \ref{ar_valFunc}}{:=} \mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s\right] = \mathbb{E}_{P_\Omega}[G_t] \overset{Lem \ref{lem_expCumRew}}{<} \infty
 \end{equation}
 
 The analogous argument guaranteeing the well definedness of our action-value function $Q^{\pi}$ as defined in Definition \ref{ar_actValFunc}, uses a deterministic distribution $P_{S \times A, (s',a')}$ such that, for a fixed but arbitrarty pair $(s',a') \in S \times A$, 
 
-\begin{equation}
+\begin{equation}\label{eq_detActStateDist}
 	P_{S \times A,(s',a')}(s,a) = 	\begin{cases}
 				1 & \text{ for } (s,a) = (s',a') \\
 				0 & \text{ else}.
@@ -256,9 +256,19 @@ The analogous argument guaranteeing the well definedness of our action-value fun
 
 This leads to a composite trajectory distribution $P_{\Omega} = P_{\Omega | s',a'}^{\pi} = P^{\pi} \circ P_{S,(s',a')}$ resulting from sampling a starting state \textit{and} action $(s,a)$ according to $P_{S,(s',a')}$, and then, given such a starting state-action pair, sampling a trajectory $\omega$ according to $\pi$. This yields
 
-\begin{equation}
+\begin{equation}\label{eq_finiteActValFunc}
 	Q^{\pi}(s',a') \overset{Def \ref{ar_actValFunc}}{:= }\mathbb{E}_{\pi}\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s', a_t = a'\right] = \mathbb{E}_{P_\Omega}[G_t] \overset{Lem \ref{lem_expCumRew}}{<} \infty.
 \end{equation}
+
+For easier reference later on, let's summarize these arguments in the form of the following 
+
+\begin{cor}{((Action-)Value functions exist)}
+	Let $\pi$ be probabilistic or deterministic policy on a finite MDP. Then the functions $V^{\pi}$ as defined in \ref{ar_valFunc} and $Q^{\pi}$ as defined in \ref{ar_actValFunc} are well defined.
+\end{cor}
+
+\begin{proof}
+	For a proof of both claims, see the argumentats presented in the paragraph preceding this corollary. In particular, for the claim about $V^{\pi}$ see the derivation of equations \ref{eq_detStateDist} and \ref{eq_finiteValFunc}. Similarly, the well definedness of $Q^{\pi}$ is justified by the arguments formalized in equations \ref{eq_detActStateDist} and \ref{eq_finiteActValFunc}.
+\end{proof}
 
 Having established the usefulness of this Lemma, let us finally prove it.
 
@@ -309,6 +319,101 @@ Let $\epsilon >0$ be arbitrary but fixed. Choosing $\hat{\epsilon} = \epsilon \f
 \end{equation}
 
 proving that $(EG_{abs}^n)_n$ is indeed Cauchy and thus convergent in $\mathbb{R}$. This proves \ref{eq_showAbsConv} for the one ordering of $\Omega$ constructed, and thus \ref{eq_showConv} for \textit{any} ordering of $\omega \in \Omega$. This proves the Lemma.
+
+\end{proof}
+
+In a similar vein, the expectations of the individual discounted rewards also exist for any finite MDP.
+
+\begin{lem}\label{lem_expIndRew}
+	Let $k \in \mathbb{N}$ be fixed but arbitrary. Then the expectation of the discounted reward at time step $t+k$, where $t$ is the starting point in time for all trajectories considered, exist and are bounded by $M$. The same holds for the absolute value of the discounted reward at time step $t+k$. In other words, we have both $\mathbb{E}_{\omega \sim P_\Omega}[\gamma^k r_{t+k}] \le \gamma^k M$ and $\mathbb{E}_{\omega \sim P_\Omega}[|\gamma^k r_{t+k}|] \le \gamma^k M$.
+\end{lem}
+
+\begin{proof}
+	The proof for either claim is nearly identical to arguments presented in the proof of Lemma \ref{lem_expCumRew}. To avoid repetition we point out the two differences: instead of $G_t(\omega)$, we use either $\gamma^k r_{t+k}$ or $|\gamma^k r_{t+k}| = \gamma^k |r_{t+k}|$ depending on which of the two claims we want to prove. Secondly, the inequality in \ref{ar_cauchySeq} is now justified by the assumption of universal boundedness \ref{eq_rewBound}, and the bound $\frac{M}{1 - \gamma}$ is to be replaced by $\gamma^k M$. Virtually every other argument can be copy pasted to prove both $\mathbb{E}_{\omega \sim P_\Omega}[\gamma^k r_{t+k}] \le \gamma^k M$ and $\mathbb{E}_{\omega \sim P_\Omega}[|\gamma^k r_{t+k}|] \le \gamma^k M$.
+\end{proof}
+
+Before concluding this existential episode, let us present one more result and its application to our value function setting.
+
+\begin{lem}{(Infinite linearity)}\label{lem_limExpSwitch}
+	Let $P_\Omega$ be a distribution on the discrete trajectory space $\Omega$. Then
+	\begin{equation}\label{eq_infLinGt}
+		\mathbb{E}_{\omega \sim P_\Omega}\left[ G_t(\omega) \right] = \lim_{n \rightarrow \infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^n \gamma^k r_{t+k} \right]
+	\end{equation}
+\end{lem}
+
+\begin{proof}
+	The first step of the proof is to reduce the claim to that of linearity of the expectation for infinite random series, i.e. to reduce our claim to 
+	\begin{equation}\label{eq_infLinX}
+		\mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^{\infty} X_k \right] \overset{!}{=} \sum_{k=0}^{\infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ X_k \right]
+	\end{equation}
+
+	and then refer to a standard argument in probability theory. To see that claim \ref{eq_infLinGt} can be rephrased in the form of \ref{eq_infLinX}, set $X_k := \gamma^k r_{t+k}$ for $k=0,1,\dots$, giving equality of the respective left hand sides. Further, note that with these $X_k$ and the fact that expectations are \textit{always} linear for \textit{finite} sums of random variables, we can see that the right hand side of \ref{eq_infLinGt} can be rewritten like
+
+	\begin{equation}
+		\begin{array}{rcl}
+		\lim_{n \rightarrow \infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^n \gamma^k r_{t+k} \right] & = & \lim_{n \rightarrow \infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^n X_k \right] \\
+			& = & \lim_{n \rightarrow \infty} \sum_{k=0}^n \mathbb{E}_{\omega \sim P_\Omega}\left[  X_k \right] \\
+			& = & \sum_{k=0}^{\infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ X_k \right],
+		\end{array}
+	\end{equation}
+
+	showing the claimed equivalence of both statements. To prove our modified claim \ref{eq_infLinX}, a standard probability theory argument states that all we require is for 
+	\begin{equation}
+		\sum_{k=0}^{\infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ | X_i | \right] \overset{!}{<} \infty
+	\end{equation}
+
+	to hold. This of course is equivalent to showing 
+	\begin{equation}\label{eq_finiteInfDiscExp}
+		\sum_{k=0}^{\infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \gamma^k | r_{t+k} | \right] \overset{!}{<} \infty,
+	\end{equation}
+
+	where we already exploited $\gamma > 0$. We can quickly verify that indeed
+
+	\begin{equation}
+		\begin{array}{rcl}
+		\sum_{k=0}^{n} \mathbb{E}_{\omega \sim P_\Omega}\left[ \gamma^k | r_{t+k} | \right] & \overset{Lem \ref{lem_expIndRew}}{\le} & \sum_{k=0}^{n} \gamma^k M \\
+			& < & \sum_{k=0}^{\infty} \gamma^k M \\
+			& = & \frac{M}{1 - \gamma}.
+		\end{array}
+	\end{equation}
+
+	Letting $n \rightarrow \infty$ on either side, we clearly have \ref{eq_finiteInfDiscExp}, thus proving the required condition and therefore proving the original claim \ref{eq_infLinGt}.
+\end{proof}
+
+A useful consequence of this result is an alternative expression for our (action-) value functions $V^{\pi}$ and $Q^{\pi}$ for some policy $\pi$ on a finite MDP.
+
+\begin{cor}{(Limit your expectations)}\label{cor_valSwitch}
+	Let $\pi$ be a policy on a finite MDP. Then
+	\begin{enumerate}
+		\item \begin{equation}\label{eq_valSwitch} V^{\pi}(s) = \lim_{n \rightarrow \infty} \mathbb{E}_{\pi}\left[ \sum_{k=0}^n \gamma^k r_{t+k} | s_t = s \right] \end{equation}
+		\item \begin{equation}\label{eq_actValSwitch} Q^{\pi}(s,a) = \lim_{n \rightarrow \infty} \mathbb{E}_{\pi}\left[ \sum_{k=0}^n \gamma^k r_{t+k} | s_t = s, a_t = a \right] \end{equation}
+	\end{enumerate}
+\end{cor}
+
+\begin{proof}
+	The proof for either identity goes all the way back (see the section surrounding equations \ref{eq_detStateDist}, \ref{eq_finiteValFunc}, \ref{eq_detActStateDist} and \ref{eq_finiteActValFunc}) to the realisation that fixing the starting state $s_t$  and then following a given policy $\pi$ is inducing a distribution $P_{\Omega} = P_{\Omega | s'}^{\pi} = P^{\pi} \circ P_{S,s'}$ on the trajectory space $\Omega$. We can write
+
+	\begin{equation}
+		\begin{array}{rcl}
+		V^{\pi}(s) & = & \mathbb{E}_{\pi}\left[ G_t | s_t = s \right] \\
+				& = & \mathbb{E}_{\omega \sim P_\Omega}\left[ G_t \right] \\
+				& \overset{Lem \ref{lem_limExpSwitch}}{=} & \lim_{n \rightarrow \infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^n \gamma^k r_{t+k} \right] \\
+				& = & \lim_{n \rightarrow \infty} \mathbb{E}_{\pi}\left[ \sum_{k=0}^n \gamma^k r_{t+k} | s_t = s \right],
+		\end{array}
+	\end{equation}
+
+	proving \ref{eq_valSwitch}. Equivalently, fixing a starting state $s_t$ \textit{and} starting action $a_t$ and then following a given policy $\pi$ induces a distribution $P_{\Omega} = P_{\Omega | s',a'}^{\pi} = P^{\pi} \circ P_{S,(s',a')}$. This allows us to write
+
+	\begin{equation}
+		\begin{array}{rcl}
+		Q^{\pi}(s,a) & = & \mathbb{E}_{\pi}\left[ G_t | s_t = s, a_t = a \right] \\
+				& = & \mathbb{E}_{\omega \sim P_\Omega}\left[ G_t \right] \\
+				& \overset{Lem \ref{lem_limExpSwitch}}{=} & \lim_{n \rightarrow \infty} \mathbb{E}_{\omega \sim P_\Omega}\left[ \sum_{k=0}^n \gamma^k r_{t+k} \right] \\
+				& = & \lim_{n \rightarrow \infty} \mathbb{E}_{\pi}\left[ \sum_{k=0}^n \gamma^k r_{t+k} | s_t = s, a_t = a \right],
+		\end{array}
+	\end{equation}
+
+	proving \ref{eq_actValSwitch}.
 
 \end{proof}
 
@@ -541,7 +646,7 @@ Another thing to note is that, if the policy $\pi_u$ is deterministic, our condi
 		\end{array}
 	\]
 
-	For the second term, we have implicitly used that $$0 \overset{\infty \leftarrow n}{\leftarrow} \min_{s \in S} V^{\pi_l}(s) \le \gamma^{n_a}\mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n_a}) | s_t = s] \le \gamma^{n_a} \max_{s \in S} V^{\pi_l}(s) \overset{n \rightarrow \infty}{\rightarrow} 0.$$ The convergence claim regarding the first term was proven in all generality for any policy $\pi$ in our earlier discussion of the value function $V^{\pi}$ and its properties.
+	For the second term, we have implicitly used that $$0 \overset{\infty \leftarrow n}{\leftarrow} \min_{s \in S} V^{\pi_l}(s) \le \gamma^{n_a}\mathbb{E}_{\pi_u}[V^{\pi_l}(s_{t+n_a}) | s_t = s] \le \gamma^{n_a} \max_{s \in S} V^{\pi_l}(s) \overset{n \rightarrow \infty}{\rightarrow} 0.$$ The convergence claim regarding the first term was proven in Corollary \ref{cor_valSwitch}, \ref{eq_valSwitch}.
 
 Informally speaking, taking an infinite number of actions according to $\pi_u$ before switching to $\pi_l$ essentially means simply following $\pi_u$ and generates, independent of the starting state $s$, an expected cumulative reward that is at least as high as the one generated by simply following $\pi_l$. This proves the theorem.
 
