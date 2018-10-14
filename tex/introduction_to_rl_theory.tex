@@ -488,7 +488,7 @@ These are the 'standard' bellman equations.
 
 We now characterize the relationship between these two functions in the following
 
-\begin{prop}{(QV Relationships)}
+\begin{prop}{(QV Relationships)}\label{prop_qVRelShips}
 	Let $\pi$ be an arbitrary policy. Then the following identities hold:
 	\begin{enumerate}
 		\item $V^{\pi}(s) = \sum_a \pi(s,a) Q^{\pi}(s,a)$ \\
@@ -543,7 +543,7 @@ $$ Q^{\pi}(s,a) = \mathbb{E}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s, a_t = a]. 
 
 Note that the last identity's expected value is \textit{not} w.r.t $\pi$ - that's because there is nothing random left to be determined according to $\pi$. The state $s_t$ is given, the action $a_t$ specified and fixed, and the expected value of the next state $s_{t+1}$ is entirely dependent on how the environment reacts to this combination; and the term $V^{\pi}$ is a deterministic function. This implies that policies sharing the same $V$ also share the same $Q$. The reverse is not necessarily true. We formalize this realisation in the subsequent
 
-\begin{cor}
+\begin{cor}\label{cor_sameVSameQ}
 	Let $\pi_1,\pi_2$ be two arbitrary policies such that $V^{\pi_1} \equiv V^{\pi_2}$. Then $Q^{\pi_1} \equiv Q^{\pi_2}$
 \end{cor}
 
@@ -742,15 +742,7 @@ Inspecting the above proof we notice an important detail: Any deterministic poli
 
 \section{Optimal policies and how to find them}
 
-In this section we will use our concept of policy comparison to formalize and analyse the concept of a \textit{best} policy. We will investigate existence, uniqueness and characterizations of such policies. We will mainly build on the previous sections results, but will at a later point be forced to introduce some usefull tools from functional analysis.
-
-With this road map in mind, let us start our journey ny clarifying what we mean by an \textit{optimal} or \textit{best} policy.
-
-\begin{defn}{(Optimal policy)}
-	Let $\pi^*$ be a policy for a finite MDP. We call $\pi^*$ an \textit{optimal policy} if and only if we have $$\pi^* \ge_{V} \pi$$ for all policies $\pi \in \Pi$.
-\end{defn}
-
-In other words, a policy $\pi^*$ whose value function $V^{\pi^*}$ dominates the value functions $V^{\pi}$ of all other policies is optimal for the given finite MDP, and what we consider 'best'. This approach seems sensible, since optimality of a policy according to the above definition maximises the expected cumulative reward (that is what a policy's value function represents).
+In this section we will use our concept of policy comparison to formalize and analyse the concept of a \textit{best} policy. We will investigate existence, uniqueness and characterizations of such policies. We will mainly build on the previous sections results, but will at a later point be forced to introduce some useful tools from functional analysis.
 
 It is fair to say that most, if not all, of the subsequent results presented in this script deal with the analysis of optimal policies. In particular, we will formally answer the following questions:
 
@@ -760,18 +752,119 @@ It is fair to say that most, if not all, of the subsequent results presented in 
 	\item Can we give a constructive way of finding or at least approximating these optimal policies?
 \end{itemize}
 
-We first turn to the question of existence. Using a result that is equivalent to the infamous \textit{Axiom of Choice}, we are able to derive the following 
+With this road map in mind, let us start our journey by clarifying what we mean by an \textit{optimal} or \textit{best} policy.
 
-\begin{prop}{(Optimal existence)}
-	For each finite MDP there exists at least one optimal (deterministic) policy.
-\end{prop}
+\subsection{Existential crisis}
+
+Let us begin this subsection by formalizing the concept of an optimal policy.
+
+\begin{defn}{(Optimal policy)}\label{def_optPol}
+	Let $\pi^*$ be a policy for a finite MDP. We call $\pi^*$ an \textit{optimal policy} if and only if we have $$\pi^* \ge_{V} \pi$$ for all policies $\pi \in \Pi$.
+\end{defn}
+
+In other words, a policy $\pi^*$ whose value function $V^{\pi^*}$ dominates the value functions $V^{\pi}$ of all other policies is optimal for the given finite MDP, and what we consider 'best'. This approach seems sensible, since optimality of a policy according to the above definition maximises the expected cumulative reward (that is what a policy's value function represents).
+
+There's some good and some bad news. The good news is that for every finite MDP, there is at least on optimal policy $\pi^*$. The bad news is that that the proof for this existence seems kind of complicated - which is probably the reason it's omitted from pretty much every "online" source I have found so far. I'm currently reading a book by Bertseklis (?) on that subject, so hopefully that will point me in the right direction.
+
+For now, we will just assume we have guaranteed the existence of an optimal policy $\pi^*$ for every finite MDP, and go from there. This brings us to the next subsection.
+
+\subsection{Behavioural issues}
+
+This subsection is dedicated to deriving some useful characteristics of the mysterious (as of yet) optimal policy of a given finite MDP. These results will turn out to be essential for the contruction of explicit algorithms aiming to converge on optimal policies. We start of with an easy corollary that states that, while there might be more than one optimal policy, they all share the same value and action value function. Since it is the value function that we use to rank and disambiguate policies from one another, the following statement essentially says that there is no need to tell one optimal policy apart from any other optimal policy, they are - literally for what it's worth - the same thing.
+
+\begin{cor}{(It's all the same thing)}\label{cor_sameOptPol}
+	Let $\pi_1, \pi_2$ be two optimal policies for a finite MDP. Then
+	\begin{enumerate}
+		\item \begin{equation}\label{eq_sameOptPolVal} V^{\pi_1} \equiv V^{\pi_2} \end{equation}
+		\item \begin{equation}\label{eq_sameOptPolActVal} Q^{\pi_1} \equiv Q^{\pi_2} \end{equation}
+	\end{enumerate}
+\end{cor}
 
 \begin{proof}
-	We will use Zorn's Lemma to prove the existence of an optimal deterministic policy, and then use results derived in the previous section to see that no probabilistic policy can outperform such a policy.
+	Since both $\pi_1$ and $\pi_2$ are optimal policies, we have both
+	\begin{equation}
+		\pi_1 \ge_V \pi_2 \Leftrightarrow V^{\pi_1}(s) \ge V^{\pi_2}(s) \, \, \forall s \in S
+	\end{equation}
 
-	Zorn's Lemma states that any partially ordered set $(S, \le_S)$ in which every chain (i.e. set of elements $C \subset S$ that can be ordered such that $e_1 \le_S e_2 \le_S ... $) has an upper bound in $S$ (i.e. an $e_{upper} \in S$ such that $e \le_S e_{upper}$ for all $e \in S$) has a maximal element (i.e. an $e_{max_S} \in S$ such that if $e_{max_S} \le e$ for some $e \in S$ then $e = e_{max_S}$ must be true).
+	as well as
 
-We will define our partially ordered set as follows. Consider all value functions derived from deterministic policies, with the partial order $$V^{\pi_1} \le V^{\pi_2} \Leftrightarrow \pi_1 \le_V \pi_2.$$ Since for any finite MDP, there is only a finite number of deterministic policies, any chain in this partially ordered set is finite, and therefore has an upper bound - namely the last element of the chain. Zorn's Lemma now implies the existence of a deterministic policy $\pi^*$ and corresponding value function such that for any other deterministic policy $\pi$ with value function $V^{\pi}$ achieving $\pi^* \le_V \pi$ then $V^{\pi} \equiv V^{\pi^*}.$
+	\begin{equation}
+		\pi_2 \le_V \pi_1 \Leftrightarrow V^{\pi_2}(s) \ge V^{\pi_1}(s) \, \, \forall s \in S,
+	\end{equation}
+
+	clearly implying the equality stated in \ref{eq_sameOptPolVal}. Claim \ref{eq_sameOptPolActVal} follows from \ref{eq_sameOptPolVal} and Corollary \ref{cor_sameVSameQ}.
+
+\end{proof}
+
+Knowing that all optimal policies share the same value and action value function, we can define the optimal versions of these functions independently of an attached optimal policy $\pi^*$.
+
+\begin{defn}{(Optimal (action-)values)}\label{def_uniqueOptActVal}
+	Let $\pi^*$ be any optimal policy for a given finite MDP. We call $V^* = V^{\pi^*}$ the optimal value function, and $Q^* = Q^{\pi^*}$ the optimal action-value function.
+\end{defn}
+
+Corollary \ref{cor_sameOptPol} guarantees the welldefinedness of the above terms. We go on to show a useful property of the optimal value function $V^*$.
+
+\begin{lem}{(Different kind of optimum)}\label{cor_optValMaxS}
+	For each $s \in S$ , the following hold:
+	\begin{enumerate}
+		\item \begin{equation}\label{eq_optValMax} V^*(s) = \max_{\pi \in \Pi} V^{\pi}(s) \end{equation}
+		\item \begin{equation}\label{eq_optActValMax} Q^*(s,a) = \max_{\pi \in \Pi} Q^{\pi}(s,a) \end{equation}
+	\end{enumerate}
+\end{lem}
+
+In other words, both the optimal value function and the optimal action-value function can be seen as the results of pointwise optimization over the state space $S$.
+
+\begin{proof}
+	We start with the first claim. Let $s \in S$ be fixed but arbitrary. By the very definition of $V^*$ as the value function of an optimal policy $\pi^*$ which satisfies \ref{}, we have
+
+	\begin{equation}
+		\max_{\pi \in \Pi} V^{\pi}(s) = \max_{\pi^* \in \Pi, \pi \text{optimal}} V^{\pi^*}(s).
+	\end{equation}
+
+	By Corollary \ref{cor_sameOptPol} we can \textit{arbitrarily} choose any optimal policy $\pi^*_1$ to obtain
+
+	\begin{equation}
+		\max_{\pi^* \in \Pi, \pi \text{optimal}} V^{\pi^*}(s) = V^{\pi^*_1}(s) = V^*(s),
+	\end{equation}
+
+	proving the identity \ref{eq_optValMax}. As for the second claim, let $(s,a) \in S \times A$ be arbitrary but fixed. Then
+
+	\begin{equation}
+		\begin{array}{rcl}
+		\max_{\pi \in \Pi}Q^{\pi}(s,a) & \overset{Prop \ref{eq_optValMax}}{=} & \max_{\pi \in \Pi} \sum_{s'} P_{ss'}^a \left[ R_{ss'}^a + \gamma V^{\pi}(s') \right] \\
+			& = & \sum_{s'} P_{ss'}^a R_{ss'}^a + \max_{\pi \in \Pi} \sum_{s'} P_{ss'}^a \gamma V^{\pi}(s').
+		\end{array}
+	\end{equation}
+
+	where we have used that the term quantifying the expectation of the immediate reward $\mathbb{E}[r_t| s_t = s, a_t = a] = \sum_{s'} P_{ss'}^a R_{ss'}^a$ is independent of the particular policy $\pi$ if both $s_t$ and $a_t$ are fixed at $s$ and $a$, respectively. We see that
+
+	\begin{equation}
+		\begin{array}{rcl}
+			& & \sum_{s'} P_{ss'}^a R_{ss'}^a + \max_{\pi \in \Pi} \sum_{s'} P_{ss'}^a \gamma V^{\pi}(s') \\
+			& \le & \sum_{s'} P_{ss'}^a R_{ss'}^a + \sum_{s'} P_{ss'}^a \gamma  \max_{\pi \in \Pi} V^{\pi}(s') \\
+			& \overset{\ref{eq_optValMax}}{=} & \sum_{s'} P_{ss'}^a R_{ss'}^a + \sum_{s'} P_{ss'}^a \gamma V^*(s') \\
+			& = & \sum_{s'} P_{ss'}^a \left[ R_{ss'}^a + \gamma V^*(s') \right]. \\
+		\end{array}
+	\end{equation}
+
+	Arbitrarily choosing an optimal policy $\pi^*$ we finally see that
+
+	\begin{equation}
+		\begin{array}{rcl}
+			& & \sum_{s'} P_{ss'}^a \left[ R_{ss'}^a + \gamma V^*(s') \right] \\
+			& \overset{Def \ref{def_uniqueOptActVal}}{=} & \sum_{s'} P_{ss'}^a \left[ R_{ss'}^a + \gamma V^{\pi^*}(s') \right] \\
+			& \overset{Prop \ref{prop_qVRelShips}}{=} & Q^{\pi^*}(s,a) \\
+			& \overset{Def \ref{def_uniqueOptActVal}}{=} & Q^*(s,a),
+		\end{array}
+	\end{equation}
+
+	proving "$\ge$" in \ref{eq_optActValMax}. To see that "$\le$" holds, consider, again using some arbitrary optimal policy $\pi^*$, that, since the optimal policy $\pi^*$, too, is an element of the set of \textit{all} policies $\Pi$, we also have
+
+	\begin{equation}
+		Q^*(s,a) \overset{Def \ref{def_uniqueOptActVal}}{=} Q^{\pi^*}(s,a) \le \max_{\pi \in \Pi} Q^{\pi}(s,a).
+	\end{equation}
+
+	Since $(s,a) \in S \times A$ was arbitrary, $\ge$ and $\le$ together yield \ref{eq_optActValMax}.
 \end{proof}
 
 \end{document}
