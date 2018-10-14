@@ -149,7 +149,7 @@ the \textit{value function} of $\pi$, and
 
 the \textit{action-value} function of $\pi$. The general idea of $V^{\pi}$ is the quantification of the value a certain state $s$ possesses under $\pi$, by assigning it the expected cumulative reward obtained when starting in that state $s$ and then acting (i.e. choosing and exeucting actions) according to $\pi$. $Q^{\pi}$ does very much the same thing, except for pairs of states and actions $(a,s)$, assigning expected cumulative rewards when starting from $s$ via action $a$, and only \textit{then} acting according to $\pi$.
 
-\subsection{Existence}
+\subsection{Existential crisis}
 
 In line with our rigorous approach so far, we dedicate this subsection to proving the well definedness of the above quantities. That is, we get assurances for:
 
@@ -157,6 +157,7 @@ In line with our rigorous approach so far, we dedicate this subsection to provin
 	\item the well definedness of the random variable defined by the series $G_t := \sum_{k=0}^{\infty}\gamma^k r_{t+k}$
 	\item the well definedness of its expected value, i.e. the well definedness of $V^{\pi}$
 	\item the well definedness of $Q^{\pi}$.
+	\item some handy derivative results from the above three 
 \end{itemize}
 
 We start our quest with guaranteeing the well definedness of $G_t$. As a random variable that is the discounted infinite sum of random variables $r_{t+k}$, $k=0,1,\dots$, it maps sequences $\omega = (s_t, a_t, s_{t+1}, a_{t+1}, \dots ) $, with $s_t,s_{t+1},\dots S$, $a_t, a_{t+1},\dots A$ onto the set of real numbers $\mathbb{R}$. In other words, by denoting $\Omega$ as the set of all such sequences $\omega$, we consider $G_t$ to be
@@ -417,9 +418,21 @@ A useful consequence of this result is an alternative expression for our (action
 
 \end{proof}
 
-\subsection{Basic properties}
+\subsection{Relationships}
 
-Let us have a closer look at the recursive nature of these functions - a feature we will exploit throughout the rest of this transcript.
+This subsection is dedicated to highlighting important and useful relationships between value and action-value functions. We will have a look at expressing one via the other, as well as recursive identities across time steps $t$. 
+
+Due to the heavy lifting done in the previous subsection as well as the inherently local (w.r.t time $t$, that is) behaviour of (finite) MDP, all probabilistic considerations in this section reduce to finite event spaces. In particular, instead of dealing with infinite but discrete trajectories $\omega = (s_t,a_t,s_{t+1},a_{t+1},\dots)$, we can focus on a finite set of state or action random variables $(s_t,a_t),\dots,(s_{t+k},a_{t+k})$, where $k$ will depend on the given context, but most of the times will not exceed 1. All expected values are therefore to be understood with respect to the finite distributions on these finite state-action space tuples  resulting from following some specified policy $\pi$, sometimes with additional constraints on starting states or actions $s_t, a_t$. While the underlying trajectory distributions $P_\Omega$ as outlined in the section surrounding equations \ref{}, \ref{}, \ref{} and \ref{} technically still apply, the properties defining a (finite) MDP as well as our previous work allow us to break free from this slightly technical "underground" world and instead work in the "above-ground" and easy-to-handle environment of finite state-action distributions. 
+
+The connection between these two worlds, in particular the transformation from trajectories $\omega$ to individual states $s_{t+k}$ and actions $a_{t+k}$, can be done by effectively grouping trajectories' probabilities that share, say, a state $s$ at a fixed point in time $t+k$. To be precise, for some distribution $P_\Omega$ on $\Omega$, we can generate a distributions $P_{P_\Omega,S}$ for $s_{t+k}$ on $S$ by putting
+
+\begin{equation}
+	P_{P_\Omega,S}(s_{t+k} = s) := \sum_{\omega \in \Omega^{t+k}_s} P_\Omega(\omega),
+\end{equation}
+
+where $\Omega^{t+k}_s := \{\omega = (s_t,a_t,s_{t+1},a_{t+1},\dots) \in \Omega | s_{t+k} = s\}$. Similar constructions can be made to generate distributions over the action space $A$ for the random variable $a_{t+k}$ representing the action chosen at time $t+k$, and so on. In this sense, any policy $\pi$ (with optional constraints on states and/or actions at some fixed point(s) in time) generates some $P_\Omega$ on $\Omega$, which in turn generates a host of distributions on $S$ and $A$, for individual states and actions, respectively. It is in this way that the following results can be connected to the results in the previous section. Personally, I found it helpful to keep in mind the concept of an "original source" distribution $P_\Omega$ when dealing with different policies' behaviour and relative performance.
+
+Having said all that, let us have a closer look at the recursive nature of both $V^{\pi}$ and $Q^{\pi}$ - a feature we will exploit throughout the rest of this transcript.
 
 \begin{prop}{(Parametrized bellman equations)}
 	Let $\pi$ be an arbitrary policy, and let $V^{\pi}$ and $Q^{\pi}$ its associated (action-)value functions. Then the following identities hold:
@@ -436,13 +449,13 @@ Let us have a closer look at the recursive nature of these functions - a feature
 			V^{\pi}(s)		& = \mathbb{E}_{\pi}[ \sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s]  \\
 						& = \mathbb{E}_{\pi}[r_t + \gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s]  \\
 						& = \mathbb{E}_{\pi}[r_t | s_t = s] + \mathbb{E}_{\pi}[\gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
-						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
+						& \overset{\ref{eq_transProb},\ref{eq_rewExpVal}}{=} \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s] \\
 						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a \mathbb{E}_{\pi} [\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_{t+1} = s'] \\
 						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a (R_{s,s'}^a + \gamma \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t'+k} | s_{t'} = s'] ) \\
 						& = \sum_a \pi(s,a) \sum_{s'} P_{s,s'}^a (R_{s,s'}^a + \gamma V^{\pi}(s') ).
 		\end{array}
 	\]
-	Note how we used the transitional probabilities and expected rewards to explicitly write out the expected value of the cumulative reward $\sum_{k=0}		^{\infty} \gamma^k r_{t+k}$. Note also how we wrote $\mathbb{E}_{\pi}$ to indicate that the expected value is w.r.t to a sequence of actions $a_t, a_{t+1},\dots$ and states $s_t,s_{t+1},\dots$ resulting from acting according to $\pi$, made explicit in subsequent steps including the term $\pi(s,a)$.
+	Note how we used the transitional probabilities and expected rewards to explicitly write out the expected value of the cumulative reward $\sum_{k=0}		^{\infty} \gamma^k r_{t+k}$ established in Lemma \ref{lem_expCumRew}. Note also how we wrote $\mathbb{E}_{\pi}$ to indicate that the expected value is w.r.t to a sequence of actions $a_t, a_{t+1},\dots$ and states $s_t (=s$, as per explicit condition $"| s_t = s"),s_{t+1},\dots$ resulting from acting according to $\pi$, made explicit in subsequent steps including the term $\pi(s,a)$.
 
 A similar line of thinking shows us that
 	\[
@@ -450,7 +463,8 @@ A similar line of thinking shows us that
 			Q^{\pi}(s,a)	& = \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+k} | s_t = s, a_t = a]  \\
 						& = \mathbb{E}_{\pi}[r_t + \gamma \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a]  \\
 						& = \mathbb{E}_{\pi}[r_t | s_t = s, a_t = a] + \gamma \mathbb{E}_{\pi}[ \sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a] \\
-						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a, s_{t+1} = s', a_{t+1} = a'] \\
+						& \overset{\ref{eq_transProb},\ref{eq_rewExpVal}}{=} \sum_{s'} P_{s,s'}^a R_{s,s'}^a \\
+						& + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_t = s, a_t = a, s_{t+1} = s', a_{t+1} = a'] \\
 						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t+1+k} | s_{t+1} = s', a_{t+1} = a'] \\
 						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') \mathbb{E}_{\pi}[\sum_{k=0}^{\infty} \gamma^k r_{t'+k} | s_{t'} = s', a_{t'} = a'] \\
 						& = \sum_{s'} P_{s,s'}^a R_{s,s'}^a + \gamma \sum_{s'} P_{s,s'}^a \sum_{a'} \pi(s,a') Q^{\pi}(s',a') \\
@@ -520,8 +534,6 @@ We now characterize the relationship between these two functions in the followin
 	completing the proof.
 
 \end{proof}
-
-\newpage
 
 As before we give the more compact versions of these identities:
 
