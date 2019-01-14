@@ -250,7 +250,7 @@ For some $i \in \mathbb{N}_0$, let $\vec{\mu}(i)$ be a finite series of probabil
 
 \begin{proof}
 
-Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the expression in Eq. \ref{stateActionControlLawTrajProb3} by summing over the set of relevant trajectories
+Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the expression in Eq. \ref{stateActionControlLawTrajProb3} by summing over the set of relevant trajectories.
 
 \begin{equation}\label{}
 	Tr_{s_0}^{s,a} =  \left\{(s',a_0,s_1,a_1,\dots,s_{i-1},a_{i-1},s,a) \Bigg| \begin{array}{lr}
@@ -261,5 +261,11 @@ Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the
 \end{equation}
 
 \end{proof}
+
+\begin{figure}
+  \includegraphics[width=\linewidth,height=7cm]{../graphics/state_action_probs_2.png}
+  \caption{All the possible trajectories $(s_0,\dots,s,a)$ starting from $s_0$ while following $\mu_0,\dots,\mu_i$ for $i = 3$, $|S| = |A| = 3$. A sample trajectory is highlighted in magenta.}
+  \label{fig:boat1}
+\end{figure}
 
 \end{document}
