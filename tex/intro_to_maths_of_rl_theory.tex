@@ -161,13 +161,13 @@ The identification of the set of control laws with a compact set will be crucial
 
 \section{Control law sequences and state-action trajectories}\label{controlLawTrajs}
 
-In the previous section we have formalized the nature of our agent's decision making process at any given time $i$: Given that the environment is in state $s_i$ and our agent follows the control law $\mu$, it will pick any action $a \in A$ with probability $\mu(s_i,a)$. There is no reason for us to constrain our agent to keep using the same control law $\mu$ over time. It is much more desirable for our agent to be able to follow a sequence of different control laws, say,
+In the previous section we have formalized the nature of our agent's decision making process at any given time $i$: Given that the environment is in state $s_i$ and our agent follows the control law $\mu$, it will pick any action $a \in A$ with probability $\mu(s_i,a)$. There is no reason for us to constrain our agent to keep using the same control law $\mu$ over time. It is much more desirable for our agent to be able to follow a sequence of different control laws, i.e. a \textit{policy}, say,
 
 \begin{equation}\label{controlLawSeqence}
-	\vec{\mu}(i) = (\mu_0, \mu_1, \dots, \mu_i),
+	\pi(i) = (\mu_0, \mu_1, \dots, \mu_i),
 \end{equation}
 
-where $\mu_t$ is the control law employed at time $t = 0,\dots i$ by our agent to pick action $a_i$. As referred to earlier, an environment with known transition probabilities $P^a_{ss'}, a \in A, s,s' \in S$ together with a sequence $\vec{\mu}(i)$ of control laws of length $i$ induces probability distributions on the sets of state-action, state and action trajectories. The environment's Markov property and the control laws' lack of memory allow for a nice factorization of these probabilities. The following Lemma makes this claim more precise.
+where $\mu_t$ is the control law employed at time $t = 0,\dots i$ by our agent to pick action $a_i$. As referred to earlier, an environment with known transition probabilities $P^a_{ss'}, a \in A, s,s' \in S$ together with a policy $\pi(i)$ of control laws of length $i$ induces probability distributions on the sets of state-action, state and action trajectories. The environment's Markov property and the control laws' lack of memory allow for a nice factorization of these probabilities. The following Lemma makes this claim more precise.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{../graphics/state_action_probs.png}
@@ -177,7 +177,7 @@ where $\mu_t$ is the control law employed at time $t = 0,\dots i$ by our agent t
 
 \begin{lem}{(State-action trajectory distribution under policies)}\label{lemStateActionControlLawTrajProb}
 
-For some $i \in \mathbb{N}_0$, let $\vec{\mu}(i)$ be a finite series of probabilistic control laws. Then for any fixed starting state $s_0 \in S$ and state-action trajectory $(s_0,a_0,\dots,s_i,a_i)$, the probability of obtaining said state-action trajectory up to time $i$ while following $\vec{\mu}(i)$ is given by
+For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic control laws. Then for any fixed starting state $s_0 \in S$ and state-action trajectory $(s_0,a_0,\dots,s_i,a_i)$, the probability of obtaining said state-action trajectory up to time $i$ while following $\pi(i)$ is given by
 
 \begin{equation}\label{stateActionControlLawTrajProb1}
 	\prod_{t=0}^{i-1} \left( \mu_t(s_t,a_t) \cdot P^{a_t}_{s_t}(s_{t+1}) \right) \cdot \mu_i(s_i,a_i).
@@ -191,9 +191,9 @@ We prove this claim via induction over the control law sequence length parameter
 
 \begin{equation}\label{controlLawTrajIA}
 	\begin{array}{ll}
-			& \Pr\{(s_0,a_0, s_1, a_1) | \text{ starting at } s_0 \text{ and following } \vec{\mu}(1) = (\mu_0,\mu_1)\} \\
-		=	& \Pr\{(s_0,a_0, s_1, a_1) | s_0, \, \vec{\mu}(1)\} = \Pr\{(s_0,a_0) \cap (s_1,a_1) | s_0, \, \vec{\mu}(1)\} \\
-		=	& \Pr\{(s_0,a_0, s_1) | s_0, \, \vec{\mu}(1)\} \cdot \Pr\{a_1 |(s_0,a_0,s_1), \, s_0, \, \vec{\mu}(1)\} \\
+			& \Pr\{(s_0,a_0, s_1, a_1) | \text{ starting at } s_0 \text{ and following } \pi(1) = (\mu_0,\mu_1)\} \\
+		=	& \Pr\{(s_0,a_0, s_1, a_1) | s_0, \, \pi(1)\} = \Pr\{(s_0,a_0) \cap (s_1,a_1) | s_0, \, \pi(1)\} \\
+		=	& \Pr\{(s_0,a_0, s_1) | s_0, \, \pi(1)\} \cdot \Pr\{a_1 |(s_0,a_0,s_1), \, s_0, \, \pi(1)\} \\
 		=	& \Pr\{(s_0,a_0,s_1) | s_0, \, \mu_0\} \cdot \Pr\{a_1 | s_1, \, \mu_1)\} \\
 		=	& \Pr\{(s_0,a_0) | s_0, \, \mu_0\} \cdot \Pr\{s_1 | (s_0,a_0), \, \mu_0 \} \cdot \Pr\{a_1 | s_1, \, \mu_1)\} \\
 		=	& \mu_0(s_0,a_0) \cdot \, P^{a_0}_{s_0}(s_1) \cdot \mu_1(s_1,a_1). \\
@@ -204,16 +204,16 @@ Now assume this claim holds for some $i-1 \in \mathbb{N}_0$. The exact same argu
 
 \begin{equation}\label{controlLawTrajIS}
 	\begin{array}{ll}
-			& \Pr\{(s_0,a_0,\dots, s_i, a_i) | \text{ starting at } s_0 \text{ and following } \vec{\mu}(i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_i, a_i) | s_0, \, \vec{\mu}(i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) \cap (s_i,a_i) | s_0, \, \vec{\mu}(i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i) | s_0, \, \vec{\mu}(i)\} \cdot \Pr\{a_i |(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i), \, s_0, \, \vec{\mu}(i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i) | s_0, \, \vec{\mu}(i-1)\} \cdot \Pr\{a_i | s_i, \, \mu_i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \vec{\mu}(i-1)\} \\
-			& \cdot \Pr\{s_i | (s_0,a_0,\dots, s_{i-1}, a_{i-1}), \, s_0, \, \vec{\mu}(i-1) \} \cdot \Pr\{a_i | s_i, \, \mu_i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \vec{\mu}(i-1)\} \\
+			& \Pr\{(s_0,a_0,\dots, s_i, a_i) | \text{ starting at } s_0 \text{ and following } \pi(i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_i, a_i) | s_0, \, \pi(i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) \cap (s_i,a_i) | s_0, \, \pi(i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i) | s_0, \, \pi(i)\} \cdot \Pr\{a_i |(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i), \, s_0, \, \pi(i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1},s_i) | s_0, \, \pi(i-1)\} \cdot \Pr\{a_i | s_i, \, \mu_i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \pi(i-1)\} \\
+			& \cdot \Pr\{s_i | (s_0,a_0,\dots, s_{i-1}, a_{i-1}), \, s_0, \, \pi(i-1) \} \cdot \Pr\{a_i | s_i, \, \mu_i)\} \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \pi(i-1)\} \\
 			& \cdot \Pr\{s_i | (s_{i-1}, a_{i-1}) \} \cdot \Pr\{a_i | s_i, \, \mu_i)\} \\
-		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \vec{\mu}(i-1)\} \cdot P^{a_{i-1}}_{s_{i-1}}(s_i) \cdot \mu_i(s_i,a_i) \\
+		=	& \Pr\{(s_0,a_0,\dots, s_{i-1}, a_{i-1}) | s_0, \, \pi(i-1)\} \cdot P^{a_{i-1}}_{s_{i-1}}(s_i) \cdot \mu_i(s_i,a_i) \\
 		=	& \prod_{t=0}^{i-2} \left( \mu_t(s_t,a_t) \cdot P^{a_t}_{s_t}(s_{t+1}) \right) \cdot \mu_{i-1}(s_{i-1,}a_{i-1}) \cdot P^{a_{i-1}}_{s_{i-1}}(s_i) \cdot \mu_i(s_i,a_i) \\		
 		=	& \prod_{t=0}^{i-1} \left( \mu_t(s_t,a_t) \cdot P^{a_t}_{s_t}(s_{t+1}) \right) \cdot \mu_i(s_i,a_i).
 	\end{array}
@@ -221,11 +221,11 @@ Now assume this claim holds for some $i-1 \in \mathbb{N}_0$. The exact same argu
 
 \end{proof}
 
-Similarly, without executing the last action at time $t = i$ and thus effectively only following $\vec{\mu}(i-1) = (\mu_0,\dots,\mu_{i-1})$ we obtain the corollary result
+Similarly, without executing the last action at time $t = i$ and thus effectively only following $\pi(i-1) = (\mu_0,\dots,\mu_{i-1})$ we obtain the corollary result
 
 \begin{cor}(State-action trajectory distribution under policies II)\label{corStateActionControlLawTrajProb1}
 
-For some $i \in \mathbb{N}_0$, let $\vec{\mu}(i-1)$ be a finite series of probabilistic control laws. Then for any fixed starting state $s_0 \in S$ and state-action trajectory $(s_0,a_0,\dots,s_i)$, the probability of obtaining said state-action trajectory up to time $i-1$ while following $\vec{\mu}(i-1)$ is given by
+For some $i \in \mathbb{N}_0$, let $\pi(i-1)$ be a finite series of probabilistic control laws. Then for any fixed starting state $s_0 \in S$ and state-action trajectory $(s_0,a_0,\dots,s_i)$, the probability of obtaining said state-action trajectory up to time $i-1$ while following $\pi(i-1)$ is given by
 
 \begin{equation}\label{stateActionControlLawTrajProb2}
 	\prod_{t=0}^{i-1} \left( \mu_t(s_t,a_t) \cdot P^{a_t}_{s_t}(s_{t+1}) \right).
@@ -237,7 +237,7 @@ Given a some starting state $s_0$, what about the chances of following \textit{a
 
 \begin{cor}(State-action trajectory distribution under policies III)\label{corStateActionControlLawTrajProb2}
 
-For some $i \in \mathbb{N}_0$, let $\vec{\mu}(i)$ be a finite series of probabilistic control laws, and let $(s,a) \in S \times A$ be any fixed but arbitrary state-action pair.Let finally $s_0 \in S$ be some fixed but arbitrary starting state. Then the probability of following \textit{any} of the state-action trajectories $(s_0,a_0,...,s,a)$, $a_t \in A$ for $t=0,...,i-1$, $s_t \in S$ for $t=1,...,i-1$, while following $\vec{\mu}(i)$ is given by
+For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic control laws, and let $(s,a) \in S \times A$ be any fixed but arbitrary state-action pair.Let finally $s_0 \in S$ be some fixed but arbitrary starting state. Then the probability of following \textit{any} of the state-action trajectories $(s_0,a_0,...,s,a)$, $a_t \in A$ for $t=0,...,i-1$, $s_t \in S$ for $t=1,...,i-1$, while following $\pi(i)$ is given by
 
 \begin{equation}\label{stateActionControlLawTrajProb3}
 	\sum_{\begin{array}{c}
