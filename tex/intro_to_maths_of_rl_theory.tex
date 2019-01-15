@@ -240,10 +240,11 @@ Given a some starting state $s_0$, what about the chances of following \textit{a
 
 \begin{cor}(State-action trajectory distribution under policies III)\label{corStateActionControlLawTrajProb2}
 
-For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic control laws, and let $(s,a) \in S \times A$ be any fixed but arbitrary state-action pair.Let finally $s_0 \in S$ be some fixed but arbitrary starting state. Then the probability of following \textit{any} of the state-action trajectories $(s_0,a_0,...,s,a)$, $a_t \in A$ for $t=0,...,i-1$, $s_t \in S$ for $t=1,...,i-1$, while following $\pi(i)$ is given by
+For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic control laws, and let $(s,a) \in S \times A$ be any fixed but arbitrary state-action pair.Let finally $s_0 = s' \in S$ be some fixed but arbitrary starting state. Then the probability of following \textit{any} of the state-action trajectories $(s',a_0,...,s,a)$, $a_t \in A$ for $t=0,...,i-1$, $s_t \in S$ for $t=1,...,i-1$, while following $\pi(i)$ is given by
 
 \begin{equation}\label{stateActionControlLawTrajProb3}
 	\sum_{\begin{array}{c}
+			s_0 = s' \\
 			a_0,\dots,a_{i-1} \in A \\
 			s_1,\dots,s_{i-1} \in S
 		\end{array}}\Big[ \prod_{t=0}^{i-2} \left( \mu_t(s_t,a_t) \cdot P^{a_t}_{s_t}(s_{t+1}) \right) \cdot \mu_{i-1}(s_{i-1},a_{i-1}) \cdot P^{a_{i-1}}_{s_{i-1}}(s) \Big] \cdot \mu_i(s,a).
@@ -256,9 +257,8 @@ For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic 
 Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the expression in Eq. \ref{stateActionControlLawTrajProb3} by summing over the set of relevant trajectories.
 
 \begin{equation}\label{}
-	Tr_{s_0}^{s,a} =  \left\{(s',a_0,s_1,a_1,\dots,s_{i-1},a_{i-1},s,a) \Bigg| \begin{array}{lr}
+	Tr_{s'}^{s,a} =  \left\{(s',a_0,s_1,a_1,\dots,s_{i-1},a_{i-1},s,a) \Bigg| \begin{array}{lr}
 															a_0, \dots, a_{i-1} \in A, \\
-															s' = s_0, \\
 															s_1,\dots,s_{i-1} \in S
 													\end{array} \right\}.
 \end{equation}
@@ -266,7 +266,7 @@ Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the
 \end{proof}
 
 \begin{figure}
-  \includegraphics[width=\linewidth,height=7cm]{../graphics/state_action_probs_2.png}
+  \includegraphics[width=\linewidth,height=8cm]{../graphics/state_action_probs_2.png}
   \caption{All the possible trajectories $(s_0,\dots,s,a)$ starting from $s_0$ while following $\mu_0,\dots,\mu_i$ for $i = 3$, $|S| = |A| = 3$. A sample trajectory is highlighted in magenta.}
   \label{fig:boat1}
 \end{figure}
@@ -290,8 +290,7 @@ the three aforementioned results induce 3 continuous (the control laws' matrix r
 \begin{equation}\label{contProbMap}
 	\begin{array}{rccl}
 		p_{s'}(s,a): 	& \Pi(S,A)^i 			& \rightarrow 	& [0,1] \\
-					& (\mu_t)_{t=0,\dots,i} 	& \mapsto 	& \Pr\left\{  (s_0,a_0,\dots,s,a), \, \Bigg| \begin{array}{lr}
-																					s_0 = s', \\
+					& (\mu_t)_{t=0,\dots,i} 	& \mapsto 	& \Pr\left\{  (s',a_0,\dots,s,a), \, \bigg| \begin{array}{lr}
 																					a_0, \dots, a_{i-1} \in A, \\
 																					s_1,\dots,s_{i-1} \in S
 																					\end{array} \right\}
@@ -302,7 +301,7 @@ mapping policies onto their conditional probabilities of following \textit{any} 
 \end{cor}
 
 \begin{proof}
-	The proof consists solely in realizing that, for any policy $\pi(i) = (\mu_0,\dots,\mu_i) \in \Pi(S,A)^i$, the image of $\pi(i)$ under $p_{s_0}(s,a)$ is of course the expression appearing in \ref{stateActionControlLawTrajProb3}, where $s_0$ understood to be fixed at $s'$. This in turn is merely a sum of products of all of $\pi(i)$ components' coefficients, and hence continuous in $\pi(i) \in \Pi(S,A)^i$, endowed with its canonical $| \cdot |_{\mathbb{R}^i}$ norm.
+	The proof consists solely in realizing that, for any policy $\pi(i) = (\mu_0,\dots,\mu_i) \in \Pi(S,A)^i$, the image of $\pi(i)$ under $p_{s'}(s,a)$ is of course the expression appearing in \ref{stateActionControlLawTrajProb3}, where $s_0$ understood to be fixed at $s'$. This in turn is merely a sum of products of all of the guiding policy $\pi(i)$'s components' coefficients, and hence continuous in $\pi(i) \in \Pi(S,A)^i$, endowed with its canonical $| \cdot |_{\mathbb{R}^i}$ norm.
 \end{proof}
 
 A direct consequence of this is that for any choice of starting state $s'$ and ending state-action pair $(s,a) \in S \times A$, the function $p_{s'}(s,a)$ as defined in \ref{contProbMap} attains its maximum over the space of permissable policies of length $\Pi(S,A)^i$.
