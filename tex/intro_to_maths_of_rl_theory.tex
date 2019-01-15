@@ -153,8 +153,11 @@ Before we conclude this section, let us develop a slightly more abstract but, as
 
 Here, the $i$-th row of the right hand side encodes the conditional probability distribution $\mu(s^i, \cdot)$ conditioned on state $s^i \in S$. We can thus see that the set of control laws can be identified with a closed and bounded, and therefore \textit{compact}, subset of the $\mathbb{R}^{|S| \times |A|}$ with its canonical norm via
 
-\begin{equation}
-	\Big\{ \mu | \mu \text{ is a control law} \Big\} = \Big\{ \mu \in \mathbb{R}^{|S| \times |A|} \Big| \mu_{ij} \ge 0 \, \forall i,j, \, \sum_{j=1}^{|A|} \mu_{ij} = 1 \, \forall i=1,\dots,|S| \Big\}.
+\begin{equation}\label{defPolicySpace}
+	\begin{array}{rcl}
+		\Big\{ \mu | \mu \text{ is a control law} \Big\} 	& = & \Big\{ \mu \in \mathbb{R}^{|S| \times |A|} \Big| \mu_{ij} \ge 0 \, \forall i,j, \, \sum_{j=1}^{|A|} \mu_{ij} = 1 \, \forall i=1,\dots,|S| \Big\} \\
+											& =: & \Pi(S,A).
+	\end{array}
 \end{equation}
 
 The identification of the set of control laws with a compact set will be crucial in maximization arguments further down the line. Before that, however, let us next see how we can use these control laws to formalize the behaviour of our agent.
@@ -267,5 +270,41 @@ Using Lemma \ref{lemStateActionControlLawTrajProb}, we immediately arrive at the
   \caption{All the possible trajectories $(s_0,\dots,s,a)$ starting from $s_0$ while following $\mu_0,\dots,\mu_i$ for $i = 3$, $|S| = |A| = 3$. A sample trajectory is highlighted in magenta.}
   \label{fig:boat1}
 \end{figure}
+
+Before we turn to the rewards in the next section, let us view this section's results from a functional point of view.
+
+In our theoretical considerations, we usually assume the environment's transitional probabilities $P^a_{ss'}, a \in A, s,s' \in S$ to be both constant and known. Since the finding of a policy that is in some way optimal will be our main goal, it is intuitive to view all formulae derived in Lemma \ref{}, Corollary \ref and Corollary \ref{} as functions of some policy $\pi = (\mu_0,\dots,\mu_i)$. Recollecting our embedding of individual policies $\mu$ into (subsets) of $\mathbb{R}^{|S| \times |A|}$ in section \ref{}, Eq. \ref{defPolicySpace}, we can see that the space of all policies of length $i$ can be seen as
+
+\begin{equation}
+	\begin{array}{rcl}
+		\Big\{ \pi(i) | \pi(i) \text{ is a policy of length } i \Big\} & = & \Big\{ \pi(i) = (\mu_t)_{t=0,\dots,i} \Big| \mu_t \textit{ is a control law } \Big\} \\
+		& \cong & \Pi(S,A)^{i},
+	\end{array}
+\end{equation}
+
+the three aforementioned results induce 3 continuous (the control laws' matrix representations' coefficients are being added and multiplied only - continuous operations) functions on the \textit{compact} set $\Pi(S,A)^i$. We spell this out explicitly for the most important result, Corollary \ref{corStateActionControlLawTrajProb2}.
+
+\begin{cor}\label{corContProbMap}
+	Let $s' \in S$ be a fixed but arbitrary starting state, and let $i \in \mathbb{N}_0$. Let further $(s,a) \in S \times A$ be a fixed but arbitrary state-action pair. Then the function
+
+\begin{equation}\label{contProbMap}
+	\begin{array}{rccl}
+		p_{s'}(s,a): 	& \Pi(S,A)^i 			& \rightarrow 	& [0,1] \\
+					& (\mu_t)_{t=0,\dots,i} 	& \mapsto 	& \Pr\left\{  (s_0,a_0,\dots,s,a), \, \Bigg| \begin{array}{lr}
+																					s_0 = s', \\
+																					a_0, \dots, a_{i-1} \in A, \\
+																					s_1,\dots,s_{i-1} \in S
+																					\end{array} \right\}
+	\end{array}
+\end{equation}
+
+mapping policies onto their conditional probabilities of following \textit{any} trajectory ending in $(s,a)$, conditioned on starting at $s_0$, is continuous on the space of permissable policies.
+\end{cor}
+
+\begin{proof}
+	The proof consists solely in realizing that, for any policy $\pi(i) = (\mu_0,\dots,\mu_i) \in \Pi(S,A)^i$, the image of $\pi(i)$ under $p_{s_0}(s,a)$ is of course the expression appearing in \ref{stateActionControlLawTrajProb3}, where $s_0$ understood to be fixed at $s'$. This in turn is merely a sum of products of all of $\pi(i)$ components' coefficients, and hence continuous in $\pi(i) \in \Pi(S,A)^i$, endowed with its canonical $| \cdot |_{\mathbb{R}^i}$ norm.
+\end{proof}
+
+A direct consequence of this is that for any choice of starting state $s'$ and ending state-action pair $(s,a) \in S \times A$, the function $p_{s'}(s,a)$ as defined in \ref{contProbMap} attains its maximum over the space of permissable policies of length $\Pi(S,A)^i$.
 
 \end{document}
