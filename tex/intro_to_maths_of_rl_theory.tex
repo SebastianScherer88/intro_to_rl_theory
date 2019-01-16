@@ -59,6 +59,7 @@
 \newtheorem{cor}{Corollary}
 \newtheorem{thm}{Theorem}
 \newtheorem{defn}{Definition}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 %%% END Article customizations
 
@@ -73,9 +74,21 @@
 
 \maketitle
 
-\section{The agent and the environment}\label{agentEnvironment}
+\section{Preliminaries}
 
-In reinforcement learning we concern ourselves with optimising the behaviour of an agent acting in a given environment. The agent's behaviour is governed by what we call control laws which act on the environment's current state, and can be probabilistic in nature. The environment responds to the agent's actions by assuming a new state. The process of obtaining this new state can also be probabilistic. 
+In reinforcement learning we concern ourselves with optimising the behaviour of an agent acting in a given environment to maximise some reward handed out by said environment. The agent's behaviour is governed by what we call control laws which act on the environment's current state, and can be probabilistic in nature. The environment responds to the agent's actions by assuming a new state and issuing a reward. The process of obtaining this new state and determining the value of said reward can also be probabilistic. In summary, our problem setting will be the (finite) repetition of the following steps:
+
+\begin{enumerate}
+	\item Determine current state $s_t$. For $t=0$ this will be a given starting state. For $t \ge 1$, this will be the environment probabilistically reacting to
+	\begin{enumerate}
+		\item The state $s_{t-1}$ in the previous time step.
+		\item The action $a_{t-1}$ as chosen by the agent in the previous time step.
+	\end{enumerate}
+	\item Determine the agent's action $a_t$. This is done via the control law, which only considers the current state $s_t$, and nothing else, and is usually probabilistic.
+	\item Based on $s_t$ and $a_t$, a probabilistic reward is handed out by the environment. For the last time step of the finite horizon problem, the reward only depends on $s_t$ since no further action will be taken.
+\end{enumerate}
+
+\subsection{The agent, the environment and the reward}\label{agentEnvironmentReward}
 
 There are some constrains to this very general setting, which we will outline in this section. 
 
@@ -83,7 +96,7 @@ Firstly, we assume that at any time $t \in \mathbb{N}_0$, the environment can on
 
 Similarly, we demand that our agent has only a finite set of actions $a \in A$, where $A$ is the finite set of actions, at his disposal at any given time $t \in \mathbb{N}_0$.
 
-For an arbitrary but fixed starting state $s_0 \in S$, the continuous back-and-forth between the agent choosing an action $a_t$ and the environment assuming a subsequent state $s_{t+1}$ for $t=0,\dots,i$ leads to \textit{state-action trajectories} of the form
+For an arbitrary but fixed starting state $s_0 \in S$, the continuous back-and-forth between the agent choosing an action $a_t$ and the environment assuming a subsequent state $s_{t+1}$ for $t=0,\dots,i$ (we ignore the rewards for the time being) leads to \textit{state-action trajectories} of the form
 
 \begin{equation}\label{stateActionTraj}
 	(s_0, a_0, s_1, a_1, \cdots, s_{i-1},a_{i-1},s_i,a_i).
@@ -103,6 +116,20 @@ We will also sometimes refer to \textit{state trajectories}
 
 as needed. For any arbtrarily given but fixed end point in time $i \in \mathbb{N}_0$, we can imbue all of these three trajectory spaces with probability distributions depending on the control laws governing the actions (where plausible), and the probabilistic behaviour of the environment. We will do this in the next section.
 
+The constraints on the environment's rewards are as follows. At any given time step $t$, the reward $r_t$ issued by the environment is distributed according to a distribution that only takes into account the present time step's state $s_t$ and agent action $a_t$. That is, the rewards awarded are instantaneous in nature and reward the current configuration of both agent and environment, but does not take into account the past. Furthermore, we assume that it is uniformly bounded, i.e. that 
+
+\begin{equation}
+	0 < r_t < M \,\, \forall t \in \mathbb{N}_0
+\end{equation}
+
+for some $M \in \mathbb{R}$. These considerations amount to the uniform boundedness of the conditioned expectations 
+
+\begin{equation}
+	0 < \mathbb{E}[r_t | s_t = s, a_t = a] =: R(a,s)_t < M
+\end{equation}
+
+for any $s \in S, a \in A$, $t \in \mathbb{N}_0$. We investigate these expectations more closely in the following section. For now, let it be mentioned that it is with respect to these, more precisely, trying to maximise these expected rewards, that we will try and optimise the control laws gouverning our agent's behaviour.
+
 Lastly, we require our environment has no memory when evolving from one state to the next, be it in response to our agent's chosen action or otherwise. We demand that the environment's state at time $i+1$, $s_{i+1} \in S$, only depends on the previous time step's state, $s_i \in S$, and the agent's chosen action $a_i \in A$ at time $i$, but \textit{not} on any other preceding states and actions $s_t, a_t, t < i$ forming the state-action trajectory leading up to the state $s_i$ and action $a_i$ at time $i$. To be more precise, we require the \textit{transitional probabilities} of our environment to satisfy
 
 \begin{equation}\label{transProbMarkov}
@@ -111,7 +138,7 @@ Lastly, we require our environment has no memory when evolving from one state to
 
 for all $s' \in S$ and $i \in \mathbb{N}_0$. This property is often referred to as the \textit{Markov} property.
 
-\section{Probabilistic control laws}\label{probControlLaws}
+\subsection{Probabilistic control laws}\label{probControlLaws}
 
 In this section we will formalize our understanding of a \textit{control law}, which can be regarded as the decision making process of our agent at a fixed time $i \mathbb{N}_0$. A control law $\mu$ is a set of probability distributions over the action space $A$, one conditional distribution $\mu(s, \cdot)$ for each possible state $s \in S$. The idea is that, using the control law $\mu$ at time $i$ to make our agent's decision $a_i$, for any possible environment state $s$ $\mu$ generates a probability distribution over the action space $A$, assigning a probability
 
@@ -162,7 +189,7 @@ Here, the $i$-th row of the right hand side encodes the conditional probability 
 
 The identification of the set of control laws with a compact set will be crucial in maximization arguments further down the line. Before that, however, let us next see how we can use these control laws to formalize the behaviour of our agent.
 
-\section{Control law sequences and state-action trajectories}\label{controlLawTrajs}
+\subsection{Control law sequences and state-action trajectories}\label{controlLawTrajs}
 
 In the previous section we have formalized the nature of our agent's decision making process at any given time $i$: Given that the environment is in state $s_i$ and our agent follows the control law $\mu$, it will pick any action $a \in A$ with probability $\mu(s_i,a)$. There is no reason for us to constrain our agent to keep using the same control law $\mu$ over time. It is much more desirable for our agent to be able to follow a sequence of different control laws, i.e. a \textit{policy}, say,
 
@@ -289,10 +316,11 @@ the three aforementioned results induce 3 continuous (the control laws' matrix r
 
 \begin{equation}\label{contProbMap}
 	\begin{array}{rccl}
-		p_{s'}(s,a): 	& \Pi(S,A)^i 			& \rightarrow 	& [0,1] \\
-					& (\mu_t)_{t=0,\dots,i} 	& \mapsto 	& \Pr\left\{  (s',a_0,\dots,s,a), \, \bigg| \begin{array}{lr}
+		p_{s'}(s,a,i): 	& \Pi(S,A)^i 			& \rightarrow 	& [0,1] \\
+					& (\mu_t)_{t=0,\dots,i} 	& \mapsto 	& \Pr\left\{  (s',a_0,\dots,s,a), \, \Bigg| \begin{array}{lr}
 																					a_0, \dots, a_{i-1} \in A, \\
-																					s_1,\dots,s_{i-1} \in S
+																					s_1,\dots,s_{i-1} \in S, \\
+																					\pi(i)
 																					\end{array} \right\}
 	\end{array}
 \end{equation}
@@ -305,5 +333,63 @@ mapping policies onto their conditional probabilities of following \textit{any} 
 \end{proof}
 
 A direct consequence of this is that for any choice of starting state $s'$ and ending state-action pair $(s,a) \in S \times A$, the function $p_{s'}(s,a)$ as defined in \ref{contProbMap} attains its maximum over the space of permissable policies of length $\Pi(S,A)^i$.
+
+\subsection{Rewards revisited}
+
+We have gathered enough preliminary results to return to a closer inspection our main object of focus: the rewards issued by the environment, depending on the state-action trajectories along which our agent travels.
+
+Recall that at any time step $t$, we are given the immediate reward $r_t$'s expectation conditioned only $s_t$ and $a_t$ (i.e. ignoring \textit{all} previous elements of the state-action trajectory) as
+
+\begin{equation}
+	\mathbb{E}[r_t | (s_0,a_0,\dots,s_{t-1},a_{t-1},s,a)] = \mathbb{E}[r_t | s_t = s, a_t = a] =: R(s,a)_t.
+\end{equation}
+
+If we are interested in the expectation of $r_t$ at time $t$ in \textit{general}, i.e. without conditioning on $s_t$ and $a_t$, can use the above to see that generally
+
+\begin{equation}\label{eqExpReward}
+	\begin{array}{rcl}
+		\mathbb{E}[r_t]	& = &	\sum_r \Pr\{r_t = r\} \cdot r \\
+					& = & 	\sum_r \left(\sum_{a \in A} \sum_{s \in S} \Pr\{r_t = r | s_t = s, a_t = a\} \cdot \Pr\{ a_t = a \cap s_t = s \} \right) \cdot r \\
+					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \sum_r \Pr \{r_t = r | a_t = a, s_t = s\} \cdot r \\
+					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot \mathbb{E}[r_t | a_t = a, s_t = s] \\
+					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot R(s,a)_t \\
+	\end{array}
+\end{equation}
+
+It is natural to ask about the rather generic expression $\Pr(a_t = a \cap s_t = s)$ appearing in the above equation and how it might be connected to the control law sequences we discussed in the previous section. What Eq. \ref{eqExpReward} tells us is that obtaining the expectation of $r_t$ requires the knowledge of the probability of observing the state action pair $(s,a)$ at $t$ for \textit{all} $s \in S, a \in A$. This in turn implies that for any finite policy $\pi(i) = (\mu_0,\dots,\mu_i)$, $i \ge t$, and starting state $s'$, we must have 
+
+\begin{equation}\label{eqExpReward}
+	\begin{array}{rcl}
+		\mathbb{E}[r_t | s_0 = s', \pi(i)]	& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s | s_0 = s', \pi(i)\} \cdot R(s,a)_t \\
+								& = &	\sum_{a \in A} \sum_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t \\
+	\end{array}
+\end{equation}
+
+Our knowledge of $p_s'(s,a)$ then ensures that the mapping
+
+\begin{equation}\label{contExpRewMap}
+	\begin{array}{rccl}
+		\mathbb{E}[r_t | s_0 = s', \pi(i)]: 	& \Pi(S,A)^i 	& \rightarrow 	& [0,M] \\
+									& \pi(i)				 		& \mapsto 	& \sum_{a \in A} \sum_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t
+	\end{array}
+\end{equation}
+
+is continuous as a finite sum of continuous functions for any $s' \in S$, provided $i \ge t$. This result is worth repeating in cursive.
+
+\begin{cor}
+For each $t \in \mathbb{N}_0$, $i \ge t$, and starting state $s' \in S$, the reward $r_t$'s expectation $\mathbb{E}[r_t | s' = s_0, \pi(i)]$, taken over all trajectories starting at $s'$ and sampled according to some $\pi(i) \in \Pi(S,A)^i$, depends continuously on the guiding policy $\pi(i)$. As such, it attains its maximum on $\Pi(S,A)^i$.
+\end{cor}
+
+\section{The discounted finite horizon problem}
+
+We dedicate this section to the formulation and solution of the so-called discounted finite horizon problem. We will use the results obtained in this section to solve the infinite horizon counterpart problem later.
+
+Let $\gamma >0$,$s' \in S$ a fixed but arbitrary starting state, and let $i \in \mathbb{N}$ be given. The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on starting at $s'$ at $t=0$, maximizes the induced finite sum of discounted expected rewards, i.e.
+
+\begin{equation}\label{eqFinDiscHorProb}
+	\text{Find } \pi(i) \in \Pi(S,A)^i \text{ so that } \begin{array}{c}
+										 \pi(i) = \argmax_{\pi(i)} \sum_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)]
+									\end{array}
+\end{equation}
 
 \end{document}
