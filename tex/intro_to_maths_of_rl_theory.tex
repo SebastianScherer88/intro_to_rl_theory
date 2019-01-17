@@ -304,8 +304,8 @@ In our theoretical considerations, we usually assume the environment's transitio
 
 \begin{equation}
 	\begin{array}{rcl}
-		\Big\{ \pi(i) | \pi(i) \text{ is a policy of length } i \Big\} & = & \Big\{ \pi(i) = (\mu_t)_{t=0,\dots,i} \Big| \mu_t \textit{ is a control law } \Big\} \\
-		& \cong & \Pi(S,A)^{i},
+		\Big\{ \pi(i) | \pi(i) \text{ is a policy of length } i+1 \Big\} & = & \Big\{ \pi(i) = (\mu_t)_{t=0,\dots,i} \Big| \mu_t \textit{ is a control law } \Big\} \\
+		& \cong & \Pi(S,A)^{i+1},
 	\end{array}
 \end{equation}
 
@@ -376,7 +376,7 @@ Our knowledge of $p_s'(s,a)$ then ensures that the mapping
 
 is continuous as a finite sum of continuous functions for any $s' \in S$, provided $i \ge t$. This result is worth repeating in cursive.
 
-\begin{cor}
+\begin{cor}{(Continuity of policy induced rewards w.r.t guiding policy)}\label{corContinuousReward}
 For each $t \in \mathbb{N}_0$, $i \ge t$, and starting state $s' \in S$, the reward $r_t$'s expectation $\mathbb{E}[r_t | s' = s_0, \pi(i)]$, taken over all trajectories starting at $s'$ and sampled according to some $\pi(i) \in \Pi(S,A)^i$, depends continuously on the guiding policy $\pi(i)$. As such, it attains its maximum on $\Pi(S,A)^i$.
 \end{cor}
 
@@ -384,12 +384,78 @@ For each $t \in \mathbb{N}_0$, $i \ge t$, and starting state $s' \in S$, the rew
 
 We dedicate this section to the formulation and solution of the so-called discounted finite horizon problem. We will use the results obtained in this section to solve the infinite horizon counterpart problem later.
 
-Let $\gamma >0$,$s' \in S$ a fixed but arbitrary starting state, and let $i \in \mathbb{N}$ be given. The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on starting at $s'$ at $t=0$, maximizes the induced finite sum of discounted expected rewards, i.e.
+Let $0 < \gamma < 1$,$s' \in S$ a fixed but arbitrary starting state, and let $i \in \mathbb{N}$ be given. The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on starting at $s'$ at $t=0$, maximizes the induced finite sum of discounted expected rewards. To be more precise, putting
+
+\begin{equation}\label{eqFinDiscHorReward}
+		J(s',\pi(i)) := \sum_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)] = \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)],
+\end{equation}
+
+our discounted finite horizon problem reduces to, given an arbitrary but fixed starting state $s' \in S$, finding
 
 \begin{equation}\label{eqFinDiscHorProb}
-	\text{Find } \pi(i) \in \Pi(S,A)^i \text{ so that } \begin{array}{c}
-										 \pi(i) = \argmax_{\pi(i)} \sum_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)]
-									\end{array}
+	\pi(i)^* := \argmax_{\pi(i) \in \Pi(S,A)^i} J(s',\pi(i)).
 \end{equation}
+
+The existence of a solution to problem \ref{eqFinDiscHorProb} follows more or less directly from our previous work.
+
+\begin{prop}(Existence of a solution)\label{lemExistenceFiniteSolution}
+	For any $i \in \mathbb{N}_0$, $s' \in S$, the discounted finite horizon problem has a solution in $\Pi(S,A)^{i+1}$.
+\end{prop}
+
+\begin{proof}
+By Corollary \ref{corContinuousReward}, the mapping 
+
+\begin{equation}\label{contDiscExpRewSumMap}
+	\begin{array}{rccl}
+		J(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
+					& \pi(i)		& \mapsto 	& \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)]
+	\end{array}
+\end{equation}
+
+is continuous as the sum of continuous functions, and therefore attains its maximum at some $\pi(i)^*$ in the compact normed space $(\Pi(S,A)^i,|\cdot|_{\mathbb{R}^i})$.
+\end{proof}
+
+From now on, we will denote the solution of the discounted finite horizon problem by $\pi(i)$, and we will denote the maximum discounted cumulative reward achieved by this solution as 
+
+\begin{equation}
+	J^*(s') := J(s',\pi(i)^*) = \max_{\pi(i) \in \Pi(S,A)^i} J(s',\pi(i))
+\end{equation}
+
+Making use of some auxiliary results from calculus layed out in the appendix, we can do better and give a more constructive approach. Informally speaking, the solution to \ref{eqFinDiscHorProb} can be obtained by 'rolling the reward up from the back'. This is formalized in the following
+
+\begin{prop}(Building of a solution)\label{lemBuildingFiniteSolution}
+	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. Set
+\begin{equation}
+	\begin{array}{rllr}
+		\hat{J}_{-1,i}(s') & = & 0 \\
+		\hat{J}_{j,i}(s') & := & \max_{\mu_{i-j} \in \Pi(S,A)} \left( \mathbb{E}\left[r_{i-j} + \hat{J}_{j-1,i}(s') \bigg| \begin{array}{c}
+																							s_0 = s', \\
+																							(\mu_0,\dots,\mu_{i-j})
+																						\end{array} 
+																							\right] \right), & j=0,\dots,i, \\
+	
+		\mu^*_{i-j} & := & \argmax_{\mu_{i-j} \in \Pi(S,A)} \left( \mathbb{E}\left[r_{i-j} + \hat{J}_{j-1,i}(s')  \bigg| \begin{array}{c}
+																							s_0 = s', \\
+																							(\mu_0,\dots,\mu_{i-j})
+																						\end{array} 
+																							\right] \right), & j=0,\dots,i. \\
+	\end{array}
+\end{equation}
+
+Then
+
+\begin{equation}
+	J^*(s') = \hat{J}_{i,i}(s')
+\end{equation}
+
+and
+
+\begin{equation}
+	\pi(i)^* = (\mu^*_0,\dots,\mu^*_i).
+\end{equation}
+
+\end{prop}
+
+One detail that might not be immediately obvious but is worth noting is that the expression $\hat{J}_{j,i}(s')$, $j=0,\dots,i$ is still very much dependent on the yet-to-be fixated control laws $\mu_0,\dots,\mu_{i-j-1}$ that help induce the underlying trajectories' distribution. Essentially, we are taking a continuous function ($J(s',\cdot)$) of multiple variables ($\mu_0,\dots,\mu_i \in \Pi(S,A)$, respectively) and maximize one dimension at a time, starting with the 'last' one, $\mu_i$, to obtain the function's global maximum over the entire domain ($\Pi(S,A)^{i+1}$).
 
 \end{document}
