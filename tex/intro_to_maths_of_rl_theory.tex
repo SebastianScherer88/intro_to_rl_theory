@@ -362,11 +362,11 @@ It is natural to ask about the rather generic expression $\Pr(a_t = a \cap s_t =
 \begin{equation}\label{eqExpReward}
 	\begin{array}{rcl}
 		\mathbb{E}[r_t | s_0 = s', \pi(i)]	& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr \{a_t = a \cap s_t = s | s_0 = s', \pi(i)\} \cdot R(s,a)_t \\
-								& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t \\
+								& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} p_{s'}(s,a,t) \cdot R(s,a)_t \\
 	\end{array}
 \end{equation}
 
-Our knowledge of $p_s'(s,a)$ then ensures that the mapping
+Our knowledge of $p_{s'}(s,a)$ then ensures that the mapping
 
 \begin{equation}\label{contExpRewMap}
 	\begin{array}{rccl}
@@ -428,7 +428,7 @@ Making use of some auxiliary results from calculus layed out in the appendix, we
 	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. Set
 \begin{equation}\label{eqCostToGoFunctionals}
 	\begin{array}{rlll}
-		\hat{J}_{-1,i}(s',\mu_0,\dots,\mu_{i-j-1}) 	& = & 0.
+		J^*_{-1}(s') 	& = & 0.
 	\end{array}
 \end{equation}
 
@@ -436,33 +436,23 @@ For $j=0,\dots,i$, iteratively set
 
 \begin{equation}
 	\begin{array}{rclll}
-		\hat{J}_{j,i}(s',\cdot):	& \Pi(S,A)^{i-j}				& \rightarrow	& \mathbb{R} & \\
-						& (\mu_0,\dots,\mu_{i-j-1})	& \mapsto 	& \max\limits_{\mu_{i-j} \in \Pi(S,A)} \Big( & \mathbb{E}\left[r_{i-j} \bigg| \begin{array}{c}
-																							s_0 = s', \\
-																							(\mu_0,\dots,\mu_{i-j})
+		J^*_j(s'):	& S	& \rightarrow	& \mathbb{R} & \\
+				& s'	& \mapsto 	& \max\limits_{\mu_a \in \{Distr. on A\}} \Big( \mathbb{E}\Big[r_{i-j} + \, \gamma \cdot J^*_{j-1}(s_{i-j+1}) \bigg| \begin{array}{c}
+																							s_{i-j} = s', \\
+																							\mu_{i-j}(s',\cdot) = \mu_a
 																						\end{array} 
-																							\right] \\
-						&				&	&								& + \, \gamma \cdot \hat{J}_{j-1,i}(s',\mu_0,\dots,\mu_{i-j}) \Big) \\
+																							\Big] \Big).\\
 	\end{array}
 \end{equation}
 
-and
+Then
 
-\begin{equation}
-		\mu^*_{i-j} := \argmax\limits_{\mu_{i-j} \in \Pi(S,A)} \Big(	\mathbb{E}\Big[r_{i-j} \bigg| 	\begin{array}{c}
-																			s_0 = s', \\
-																			(\mu_0,\dots,\mu_{i-j})
-																		\end{array} 
-																		\Big] + \, \gamma \cdot \hat{J}_{j-1,i}(s',\mu_0,\dots,\mu_{i-j}) \Big)
-\end{equation}
-
-for $j=0,\dots,i$. Then
-
-
+\begin{enumerate}
+	\item $J^*_j(s')$,$j=0,\dots,i$ are well-defined.
+	\item $J^*_i(s') = J^*(s')$ for all $s' \in S$.
+\end{enumerate}
 
 \end{prop}
-
-Essentially, we are taking a continuous function ($J(s',\cdot)$) of multiple variables ($\mu_0,\dots,\mu_i \in \Pi(S,A)$, respectively) and maximize one dimension at a time, starting with the 'last' one, $\mu_i$, to obtain the function's global maximum over the entire domain ($\Pi(S,A)^{i+1}$).
 
 
 \end{document}
