@@ -160,7 +160,7 @@ For completeness, we note that for any such control law $\mu$ clearly
  for every state action pair $(s,a) \in S \times A$, as well as 
 
 \begin{equation}\label{controlProbSum1}
-	\sum_{a \in A} \mu(s,a) = 1
+	\sum\limits_{a \in A} \mu(s,a) = 1
 \end{equation}
 
 for all $s \in S$, must hold. 
@@ -183,7 +183,7 @@ Here, the $i$-th row of the right hand side encodes the conditional probability 
 
 \begin{equation}\label{defPolicySpace}
 	\begin{array}{rcl}
-		\Big\{ \mu | \mu \text{ is a control law} \Big\} 	& = & \Big\{ \mu \in \mathbb{R}^{|S| \times |A|} \Big| \mu_{ij} \ge 0 \, \forall i,j, \, \sum_{j=1}^{|A|} \mu_{ij} = 1 \, \forall i=1,\dots,|S| \Big\} \\
+		\Big\{ \mu | \mu \text{ is a control law} \Big\} 	& = & \Big\{ \mu \in \mathbb{R}^{|S| \times |A|} \Big| \mu_{ij} \ge 0 \, \forall i,j, \, \sum\limits_{j=1}^{|A|} \mu_{ij} = 1 \, \forall i=1,\dots,|S| \Big\} \\
 											& =: & \Pi(S,A).
 	\end{array}
 \end{equation}
@@ -271,7 +271,7 @@ Given a some starting state $s_0$, what about the chances of following \textit{a
 For some $i \in \mathbb{N}_0$, let $\pi(i)$ be a finite series of probabilistic control laws, and let $(s,a) \in S \times A$ be any fixed but arbitrary state-action pair.Let finally $s_0 = s' \in S$ be some fixed but arbitrary starting state. Then the probability of following \textit{any} of the state-action trajectories $(s',a_0,...,s,a)$, $a_t \in A$ for $t=0,...,i-1$, $s_t \in S$ for $t=1,...,i-1$, while following $\pi(i)$ is given by
 
 \begin{equation}\label{stateActionControlLawTrajProb3}
-	\sum_{\begin{array}{c}
+	\sum\limits_{\begin{array}{c}
 			s_0 = s' \\
 			a_0,\dots,a_{i-1} \in A \\
 			s_1,\dots,s_{i-1} \in S
@@ -349,11 +349,11 @@ If we are interested in the expectation of $r_t$ at time $t$ in \textit{general}
 
 \begin{equation}\label{eqExpReward}
 	\begin{array}{rcl}
-		\mathbb{E}[r_t]	& = &	\sum_r \Pr\{r_t = r\} \cdot r \\
-					& = & 	\sum_r \left(\sum_{a \in A} \sum_{s \in S} \Pr\{r_t = r | s_t = s, a_t = a\} \cdot \Pr\{ a_t = a \cap s_t = s \} \right) \cdot r \\
-					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \sum_r \Pr \{r_t = r | a_t = a, s_t = s\} \cdot r \\
-					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot \mathbb{E}[r_t | a_t = a, s_t = s] \\
-					& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot R(s,a)_t \\
+		\mathbb{E}[r_t]	& = &	\sum\limits_r \Pr\{r_t = r\} \cdot r \\
+					& = & 	\sum\limits_r \left(\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr\{r_t = r | s_t = s, a_t = a\} \cdot \Pr\{ a_t = a \cap s_t = s \} \right) \cdot r \\
+					& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr \{a_t = a \cap s_t = s\} \sum\limits_r \Pr \{r_t = r | a_t = a, s_t = s\} \cdot r \\
+					& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot \mathbb{E}[r_t | a_t = a, s_t = s] \\
+					& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr \{a_t = a \cap s_t = s\} \cdot R(s,a)_t \\
 	\end{array}
 \end{equation}
 
@@ -361,8 +361,8 @@ It is natural to ask about the rather generic expression $\Pr(a_t = a \cap s_t =
 
 \begin{equation}\label{eqExpReward}
 	\begin{array}{rcl}
-		\mathbb{E}[r_t | s_0 = s', \pi(i)]	& = &	\sum_{a \in A} \sum_{s \in S} \Pr \{a_t = a \cap s_t = s | s_0 = s', \pi(i)\} \cdot R(s,a)_t \\
-								& = &	\sum_{a \in A} \sum_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t \\
+		\mathbb{E}[r_t | s_0 = s', \pi(i)]	& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} \Pr \{a_t = a \cap s_t = s | s_0 = s', \pi(i)\} \cdot R(s,a)_t \\
+								& = &	\sum\limits_{a \in A} \sum\limits_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t \\
 	\end{array}
 \end{equation}
 
@@ -371,7 +371,7 @@ Our knowledge of $p_s'(s,a)$ then ensures that the mapping
 \begin{equation}\label{contExpRewMap}
 	\begin{array}{rccl}
 		\mathbb{E}[r_t | s_0 = s', \pi(i)]: 	& \Pi(S,A)^i 	& \rightarrow 	& [0,M] \\
-									& \pi(i)				 		& \mapsto 	& \sum_{a \in A} \sum_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t
+									& \pi(i)				 		& \mapsto 	& \sum\limits_{a \in A} \sum\limits_{s \in S} p_s'(s,a,t) \cdot R(s,a)_t
 	\end{array}
 \end{equation}
 
@@ -388,7 +388,7 @@ We dedicate this section to the formulation and solution of the so-called discou
 Let $0 < \gamma < 1$,$s' \in S$ a fixed but arbitrary starting state, and let $i \in \mathbb{N}$ be given. The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on starting at $s'$ at $t=0$, maximizes the induced finite sum of discounted expected rewards. To be more precise, putting
 
 \begin{equation}\label{eqFinDiscHorReward}
-		J(s',\pi(i)) := \sum_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)] = \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)],
+		J(s',\pi(i)) := \sum\limits_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)] = \sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)],
 \end{equation}
 
 our discounted finite horizon problem reduces to, given an arbitrary but fixed starting state $s' \in S$, finding
@@ -409,7 +409,7 @@ By Corollary \ref{corContinuousReward}, the mapping
 \begin{equation}\label{contDiscExpRewSumMap}
 	\begin{array}{rccl}
 		J(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
-					& \pi(i)		& \mapsto 	& \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)]
+					& \pi(i)		& \mapsto 	& \sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)]
 	\end{array}
 \end{equation}
 
@@ -424,106 +424,45 @@ From now on, we will denote the solution of the discounted finite horizon proble
 
 Making use of some auxiliary results from calculus layed out in the appendix, we can do better and give a more constructive approach. Informally speaking, the solution to \ref{eqFinDiscHorProb} can be obtained by 'rolling the reward up from the back'. This is formalized in the following
 
-\begin{prop}(Building of a solution)\label{lemBuildingFiniteSolution}
+\begin{prop}(Optimal cost-to-go)\label{lemBuildingFiniteSolution}
 	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. Set
 \begin{equation}\label{eqCostToGoFunctionals}
-	\begin{array}{rllr}
-		\hat{J}_{-1,i}(s') & = & 0 \\
-		\hat{J}_{j,i}(s') & := & \max\limits_{\mu_{i-j} \in \Pi(S,A)} \left( \mathbb{E}\left[r_{i-j} + \gamma \hat{J}_{j-1,i}(s') \bigg| \begin{array}{c}
-																							s_0 = s', \\
-																							(\mu_0,\dots,\mu_{i-j})
-																						\end{array} 
-																							\right] \right), & j=0,\dots,i, \\
-	
-		\mu^*_{i-j} & := & \argmax\limits_{\mu_{i-j} \in \Pi(S,A)} \left( \mathbb{E}\left[r_{i-j} + \gamma \hat{J}_{j-1,i}(s')  \bigg| \begin{array}{c}
-																							s_0 = s', \\
-																							(\mu_0,\dots,\mu_{i-j})
-																						\end{array} 
-																							\right] \right), & j=0,\dots,i. \\
+	\begin{array}{rlll}
+		\hat{J}_{-1,i}(s',\mu_0,\dots,\mu_{i-j-1}) 	& = & 0.
 	\end{array}
 \end{equation}
 
-Then
+For $j=0,\dots,i$, iteratively set
 
 \begin{equation}
-	J^*(s') = \hat{J}_{i,i}(s')
+	\begin{array}{rclll}
+		\hat{J}_{j,i}(s',\cdot):	& \Pi(S,A)^{i-j}				& \rightarrow	& \mathbb{R} & \\
+						& (\mu_0,\dots,\mu_{i-j-1})	& \mapsto 	& \max\limits_{\mu_{i-j} \in \Pi(S,A)} \Big( & \mathbb{E}\left[r_{i-j} \bigg| \begin{array}{c}
+																							s_0 = s', \\
+																							(\mu_0,\dots,\mu_{i-j})
+																						\end{array} 
+																							\right] \\
+						&				&	&								& + \, \gamma \cdot \hat{J}_{j-1,i}(s',\mu_0,\dots,\mu_{i-j}) \Big) \\
+	\end{array}
 \end{equation}
 
 and
 
 \begin{equation}
-	\pi(i)^* = (\mu^*_0,\dots,\mu^*_i).
+		\mu^*_{i-j} := \argmax\limits_{\mu_{i-j} \in \Pi(S,A)} \Big(	\mathbb{E}\Big[r_{i-j} \bigg| 	\begin{array}{c}
+																			s_0 = s', \\
+																			(\mu_0,\dots,\mu_{i-j})
+																		\end{array} 
+																		\Big] + \, \gamma \cdot \hat{J}_{j-1,i}(s',\mu_0,\dots,\mu_{i-j}) \Big)
 \end{equation}
+
+for $j=0,\dots,i$. Then
+
+
 
 \end{prop}
 
-One detail that might not be immediately obvious but is worth noting is that the expression $\hat{J}_{j,i}(s')$, $j=0,\dots,i-1$ is still very much dependent on the yet-to-be fixated control laws $\mu_0,\dots,\mu_{i-j-1}$ that help induce the underlying trajectories' distribution. Essentially, we are taking a continuous function ($J(s',\cdot)$) of multiple variables ($\mu_0,\dots,\mu_i \in \Pi(S,A)$, respectively) and maximize one dimension at a time, starting with the 'last' one, $\mu_i$, to obtain the function's global maximum over the entire domain ($\Pi(S,A)^{i+1}$).
+Essentially, we are taking a continuous function ($J(s',\cdot)$) of multiple variables ($\mu_0,\dots,\mu_i \in \Pi(S,A)$, respectively) and maximize one dimension at a time, starting with the 'last' one, $\mu_i$, to obtain the function's global maximum over the entire domain ($\Pi(S,A)^{i+1}$).
 
-\begin{proof}
-
-As already mentioned in the proof of Proposition \ref{propExistenceFiniteSolution}, for every $s' \in S$ the mapping
-
-\begin{equation}\label{contDiscExpRewSumMap2}
-	\begin{array}{rccl}
-		J(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
-					& (\mu_0,\dots,\mu_i)& \mapsto 	& \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', (\mu_0,\dots,\mu_i)]
-	\end{array}
-\end{equation}
-
-is continuous, where $\Pi(S,A)^{i+1}$. In particular, it is continuous in every variable $\mu_t \in \Pi(S,A)$, $t=0,\dots,i$. Using the continuity Lemma \ref{}, we can see that
-
-\begin{equation}
-	\begin{array}{rcl}
-		J^*(s') 	& = 	& \max\limits_{(\mu_0,\dots,\mu_i) \in \Pi(S,A)^{i+1}} J(s',(\mu_0,\dots,\mu_i)) \\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \max\limits_{\mu_1 \in \Pi(S,A)} \dots \max\limits_{\mu_i \in \Pi(S,A)} J(s',(\mu_0,\dots,\mu_i)) \\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \max\limits_{\mu_1 \in \Pi(S,A)} \dots \max\limits_{\mu_i \in \Pi(S,A)} \left( \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', (\mu_0,\dots,\mu_i)] \right).
-	\end{array}
-\end{equation}
-
-Since for any $0 <t \le i$, we have
-
-\begin{equation}
-	\mathbb{E}[r_t | s_0 = s, (\mu_0,\dots,\mu_i)] = \mathbb{E}[r_t | s_0 = s, (\mu_0,\dots,\mu_t)],
-\end{equation}
-
-i.e. the expectation of the reward at time $t$ only depends on the control laws before and at time $t$ $(\mu_0,\dots,\mu_t)$, we can rewrite the above expression by dragging the maximization operations into the sum, 'skipping ' the terms of $J(s',)$ that they don't affect.
-
-\begin{equation}
-	\begin{array}{rcl}
-		J^*(s') 	& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \cdots \max\limits_{\mu_{i-1} \in \Pi(S,A)} \max\limits_{\mu_i \in \Pi(S,A)} \left( \sum_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', (\mu_0,\dots,\mu_i)] \right) \\
-%				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \cdots \max\limits_{\mu_{i-1} \in \Pi(S,A)} \Big( \sum_{t=0}^{i-1} \gamma^t \cdot  \mathbb{E}[ r_t | s_0 = s', (\mu_0,\dots,\mu_i)] \\
-%				& 	& \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad + \; \gamma^i \cdot \max\limits_{\mu_{i} \in \Pi(S,A)} \Big( \mathbb{E}[r_i | s_0 = s', (\mu_0,\dots,\mu_i)] \Big)\Big) \\
-%				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \cdots \Big( \sum_{t=0}^{i-2} \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', (\mu_0,\dots,\mu_i)] \\
-%				& 	& \quad \quad \quad \quad \quad \quad \quad + \; \gamma^{i-1} \cdot \max\limits_{\mu_{i-1} \in \Pi(S,A)} \Big( \mathbb{E}[r_{i-1} | s_0 = s', (\mu_0,\dots,\mu_i)] \\
-%				& 	& \quad \quad \quad \quad \quad \quad \quad \quad \quad+ \; \gamma \cdot \max\limits_{\mu_{i} \in \Pi(S,A)} \Big( \mathbb{E}[r_i | s_0 = s', (\mu_0,\dots,\mu_i)] \Big) \Big) \cdots \Big)\\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \mathbb{E}[ r_0 | s_0 = s', (\mu_0,\dots,\mu_i)]  \\
-				& 	& \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_1 \in \Pi(S,A)} \Big( \cdot \mathbb{E}[ r_1 | s_0 = s', (\mu_0,\dots,\mu_i)]\\
-				&	& \quad \quad \quad \quad \quad \quad \ddots \\
-				& 	& \quad \quad \quad \quad \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_{i-1} \in \Pi(S,A)} \Big( \mathbb{E}[r_{i-1} | s_0 = s', (\mu_0,\dots,\mu_i)] \\
-				& 	& \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_{i} \in \Pi(S,A)} \Big( \mathbb{E}[r_i | s_0 = s', (\mu_0,\dots,\mu_i)] \Big) \Big) \cdots \Big)\Big)\\
-	\end{array}
-\end{equation}
-
-Recalling the definition of our cost functionals $\hat{J}_{j,i}$, $j=0,\dots,i$ as per \ref{eqCostToGoFunctionals}, we see that we can iteratively substitute
-
-\begin{equation}
-	\begin{array}{rcl}
-		J^*(s') 	& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \mathbb{E}[ r_0 | s_0 = s', (\mu_0,\dots,\mu_i)]  \\
-				& 	& \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_1 \in \Pi(S,A)} \Big( \cdot \mathbb{E}[ r_1 | s_0 = s', (\mu_0,\dots,\mu_i)]\\
-				&	& \quad \quad \quad \quad \quad \quad \ddots \\
-				& 	& \quad \quad \quad \quad \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_{i-1} \in \Pi(S,A)} \Big( \mathbb{E}[r_{i-1} | s_0 = s', (\mu_0,\dots,\mu_i)] + \gamma \hat{J}_{0,i}(s') \Big) \cdots \Big)\Big)\\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \mathbb{E}[ r_0 | s_0 = s', (\mu_0,\dots,\mu_i)]  \\
-				& 	& \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_1 \in \Pi(S,A)} \Big( \cdot \mathbb{E}[ r_1 | s_0 = s', (\mu_0,\dots,\mu_i)]\\
-				&	& \quad \quad \quad \quad \quad \quad \ddots \\
-				& 	& \quad \quad \quad \quad \quad \quad \quad \quad + \; \gamma \cdot \hat{J}_{1,i}(s') \cdots \Big)\Big)\\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \mathbb{E}[ r_0 | s_0 = s', (\mu_0,\dots,\mu_i)]  \\
-				& 	& \quad \quad \quad \quad + \; \gamma \cdot \max\limits_{\mu_1 \in \Pi(S,A)} \Big( \mathbb{E}[ r_1 | s_0 = s', (\mu_0,\dots,\mu_i)] + \hat{J}_{i-2,i}(s') \Big) \Big)\\
-				& =	& \max\limits_{\mu_0 \in \Pi(S,A)} \Big( \mathbb{E}[ r_0 | s_0 = s', (\mu_0,\dots,\mu_i)]  + \hat{J}_{i-1,i}(s') \Big) \\
-				& =	& \hat{J}_{i,i}(s').
-	\end{array}
-\end{equation}
-
-This proves claim \ref{}.
-\end{proof}
 
 \end{document}
