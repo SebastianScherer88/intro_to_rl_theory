@@ -326,7 +326,7 @@ the three aforementioned results induce 3 continuous (the control laws' matrix r
 	\end{array}
 \end{equation}
 
-mapping policies onto their conditional probabilities of following \textit{any} trajectory ending in $(s,a)$, conditioned on starting at $s_0$, is continuous on the space of permissable policies.
+mapping policies onto their conditional probabilities of following \textit{any} trajectory ending in $(s,a)$, conditioned on starting in state $s'$ at time $t=0$, is continuous on the space of permissable policies.
 \end{cor}
 
 \begin{proof}
@@ -408,7 +408,7 @@ By Corollary \ref{corContinuousReward}, the mapping
 
 \begin{equation}\label{contDiscExpRewSumMap}
 	\begin{array}{rccl}
-		J(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
+		J_i(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
 					& \pi(i)		& \mapsto 	& \sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)]
 	\end{array}
 \end{equation}
@@ -419,38 +419,57 @@ is continuous as the sum of continuous functions, and therefore attains its maxi
 From now on, we will denote the solution of the discounted finite horizon problem by $\pi^*(i)$, and we will denote the maximum discounted cumulative reward achieved by this solution as 
 
 \begin{equation}
-	J^*(s') := J(s',\pi(i)^*) = \max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} J(s',\pi(i))
+	J_i^*(s') := J_i(s',\pi(i)^*) = \max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} J_i(s',\pi(i))
 \end{equation}
 
 Making use of some auxiliary results from calculus layed out in the appendix, we can do better and give a more constructive approach. Informally speaking, the solution to \ref{eqFinDiscHorProb} can be obtained by 'rolling the reward up from the back'. This is formalized in the following
 
 \begin{prop}(Optimal cost-to-go)\label{lemBuildingFiniteSolution}
-	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. Set
-\begin{equation}\label{eqCostToGoFunctionals}
-	\begin{array}{rlll}
-		J^*_{-1}(s') 	& = & 0.
+	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. For all $s^1,\dots,s^{|S|} \in S$, define
+\begin{equation}
+	\begin{array}{clll}
+		\mu_j^*(s^k,\cdot)	& := 	& \argmax\limits_{\mu_a \in \{Distr. on A\}} \Big( \mathbb{E}\Big[r_j \Big| \begin{array}{c}
+																							s_j = s^k, \\
+																							\mu_j(s',\cdot) = \mu_a
+																						\end{array} 
+																							\Big] + \max\limits_{(\mu_{j+1},\dots,\mu_i)}\Big( \mathbb{E} \Big[ \sum\limits_{l=1}^{i-j}\gamma^l r_{j+l} \Big| \begin{array}{c}
+															s_j = s^k, \\
+															\mu_j(s',\cdot) = \mu_a, \\
+															\mu_j,\dots,\mu_i)
+														\end{array} \Big] \Big)\Big),\\
 	\end{array}
 \end{equation}
 
-For $j=0,\dots,i$, iteratively set
+$k=1,\dots,|S|$. Define the optimal control law at time j as
 
 \begin{equation}
-	\begin{array}{rclll}
-		J^*_j(s'):	& S	& \rightarrow	& \mathbb{R} & \\
-				& s'	& \mapsto 	& \max\limits_{\mu_a \in \{Distr. on A\}} \Big( \mathbb{E}\Big[r_{i-j} + \, \gamma \cdot J^*_{j-1}(s_{i-j+1}) \bigg| \begin{array}{c}
-																							s_{i-j} = s', \\
-																							\mu_{i-j}(s',\cdot) = \mu_a
-																						\end{array} 
-																							\Big] \Big).\\
-	\end{array}
+	\mu_j^* = 	\left(\begin{array}{c}
+						\mu_j(s^1,\cdot) \\
+						\vdots \\
+						\mu_j(s^{|S|},\cdot)
+				\end{array}\right).
 \end{equation}
 
-Then
+Let $0\le j \le i$ be fixed but arbitrary, and let $d_{s_j}$ be any distribution on the state space $S$. Then 
 
-\begin{enumerate}
-	\item $J^*_j(s')$,$j=0,\dots,i$ are well-defined.
-	\item $J^*_i(s') = J^*(s')$ for all $s' \in S$.
-\end{enumerate}
+\begin{equation}
+	\mathbb{E}\Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
+														s_j \sim d_{s_j} \\
+														(\mu_j^*,\dots,\mu^*_i)
+													\end{array} \Big] = \max\limits_{(\mu_j,\dots,\mu_i)} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
+													s_j \sim d_{s_j} \\
+													(\mu_j,\dots,\mu_i)
+												\end{array} \Big] \Big).
+\end{equation}
+
+In other words, given any intial distribution $d_{s_j}$ over state $s_j$ at time $t=j$, the control laws $\mu_j,\mu_{j+1},\dots,\mu_i$ as defined above achieve the optimal cost-to-go reward, that is, they maximise the expression
+
+\begin{equation}
+	 \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
+													s_j \sim d_{s_j} \\
+													(\mu_j,\dots,\mu_i)
+												\end{array} \Big].
+\end{equation}
 
 \end{prop}
 
