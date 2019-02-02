@@ -428,11 +428,11 @@ Making use of some auxiliary results from calculus layed out in the appendix, we
 	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. For all $s^1,\dots,s^{|S|} \in S$, define
 \begin{equation}
 	\begin{array}{clll}
-		\mu_j^*(s^k,\cdot)	& := 	& \argmax\limits_{\mu_a \in \{Distr. on A\}} \Big( \mathbb{E}\Big[r_j \Big| \begin{array}{c}
+		\mu_j^*(s^k,\cdot)	& := 	& \argmax\limits_{\mu_a \in \Pi(\{s^k\},A)} \Big( \mathbb{E}\Big[r_j \Big| \begin{array}{c}
 																							s_j = s^k, \\
 																							\mu_j(s',\cdot) = \mu_a
 																						\end{array} 
-																							\Big] + \max\limits_{(\mu_{j+1},\dots,\mu_i)}\Big( \mathbb{E} \Big[ \sum\limits_{l=1}^{i-j}\gamma^l r_{j+l} \Big| \begin{array}{c}
+																							\Big] + \max\limits_{(\mu_{j+1},\dots,\mu_i) \in Pi(S,A)^{i-j}}\Big( \mathbb{E} \Big[ \sum\limits_{l=1}^{i-j}\gamma^l r_{j+l} \Big| \begin{array}{c}
 															s_j = s^k, \\
 															\mu_j(s',\cdot) = \mu_a, \\
 															\mu_j,\dots,\mu_i)
@@ -456,13 +456,13 @@ Let $0\le j \le i$ be fixed but arbitrary, and let $d_{s_j}$ be any distribution
 	\mathbb{E}\Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
 														s_j \sim d_{s_j} \\
 														(\mu_j^*,\dots,\mu^*_i)
-													\end{array} \Big] = \max\limits_{(\mu_j,\dots,\mu_i)} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
+													\end{array} \Big] = \max\limits_{(\mu_j,\dots,\mu_i) \in \Pi(S,A)^{i-j+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
 													s_j \sim d_{s_j} \\
 													(\mu_j,\dots,\mu_i)
 												\end{array} \Big] \Big).
 \end{equation}
 
-In other words, given any intial distribution $d_{s_j}$ over state $s_j$ at time $t=j$, the control laws $\mu_j,\mu_{j+1},\dots,\mu_i$ as defined above achieve the optimal cost-to-go reward, that is, they maximise the expression
+In other words, given any intial distribution $d_{s_j}$ over state $s_j$ at time $t=j$, the control laws $\mu_j^*,\mu_{j+1}^*,\dots,\mu_i^*$ as defined above achieve the optimal cost-to-go reward, that is, they maximise the expression
 
 \begin{equation}
 	 \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
@@ -473,5 +473,163 @@ In other words, given any intial distribution $d_{s_j}$ over state $s_j$ at time
 
 \end{prop}
 
+over $(\mu_j,\dots,\mu_i) \in \Pi(S,A)^{i-j+1}$. Note that the above claim implies that the rewards collected from point $t=j$ onwards until the end $t=i$ can be maximised by following a fixed set of control laws that don't depend on your starting state distribution $d_{s_j}$ of $s_j$. In particular, these control laws are the same for any fixed starting state $s_j = s'$, $s' \in S$. As the following proof will show, this is achieved by making use of the markov property - specifically, that rewards only depend on the most recent state and action, respectively, but not on the more distant past. It is this property that allows us to define the the optimal control laws $\mu_j^*$ iteratively, effectively rolling up the rewards process from the back.
+
+\begin{proof}
+
+We will show the claim by induction over the delayed start time index $j$. Let $s_k \in \{ s^1,\dots,s^{|S|}\} = S$ be a fixed but arbitrary state from the (arbitrarily) ordered state space $S$, and let $d_{s_i}$ be any distribution on $s_i$. For $j=i$, we clearly have
+
+\begin{equation}
+	\mu_i^*(s^k,\cdot) := \argmax\limits_{\mu_a \in \Pi(\{s^k\},A)} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i ] ).
+\end{equation}
+
+We can then see that
+
+\begin{equation}
+	\begin{array}{rcl}
+		\max\limits_{\mu_i \in \Pi(S,A)} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i ] ) 	& = 	& \max\limits_{\mu_i \in \Pi(S,A)} \Big( \sum\limits_{s \in S} \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \mathbb{E}[ r_i | s_i = s, \mu_i ] \Big) \\
+																					& \le 	& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \max\limits_{\mu_i \in \Pi(S,A)} (\mathbb{E}[ r_i | s_i = s, \mu_i ]) \Big) \\
+																					& = 	& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \max\limits_{\mu_a \in \Pi(\{s\},A)} \Big(\mathbb{E}\Big[ r_i \Big| \begin{array}{c}
+																																																	s_i = s, \\
+																																																	\mu_i(s,\cdot) = \mu_a
+																																																\end{array} \Big] \Big) \Big) \\
+																					& =		& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \mathbb{E}\Big[ r_i \Big| \begin{array}{c}
+																																										s_i = s, \mu_i \\
+																																										\mu_i(s,\cdot) = \mu_i^*(s,\cdot)
+																																									\end{array} \Big] \Big) \\
+																					& =		& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \mathbb{E}[ r_i | s_i = s, \mu_i^* ] \Big) \\
+																					& =		&  \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i^* ]. \\
+	\end{array}
+\end{equation}
+
+Since the $\max$ of the reward-to-go over all partial control law sequences can not be smaller than the expectation achieved by one specific sequence, we naturally have $\ge$ as well. From this follows equality, marking our induction start. 
+
+For the induction step, let's assume Eq. \ref{} holds for $j = k$ for some $k$, $1 \le k \le i$. We will show that it then also holds for $j = k - 1$. Let again $d_{s_k}$ be any distribution over the state $s_k$ at time $t = k$, the time we start accumulating rewards in this Proposition's cost-to-go scenario. Denote by $\mu_k,\dots \mu_i$ the control laws achieving optimal reward-to-go expectations as per our induction step's assumption. We can write
+
+\begin{equation}
+	\begin{array}{rcl}
+			&	&	\max\limits_{(\mu_{k-1},\dots,\mu_i) \in \Pi(S,A)^{i-k+2}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
+																																						s_{k-1} \sim d_{s_{k-1}}, \\
+																																						\mu_{k-1},\dots,\mu_i
+																																					\end{array} \Big] \Big) \\
+			& = &	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \sum\limits_{l=0}^{i-k+1} \gamma^l \mathbb{E}\Big[ r_{k-1+1} \Big| 	\begin{array}{c}
+																																																s_{k-1} \sim d_{s_{k-1}}, \\
+																																																\mu_{k-1},\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big)
+	\end{array}
+\end{equation}
+
+making use of Lemma \ref{} in the appendix. Note that the first expression is well defined as the maximum of a functional that is continuous on the space of control laws $(\mu_{k-1},\dots,\mu_i) \in \Pi(S,A)^{i-k+2}$. The continuity is yet another consequence of Corollary \ref{corContinuousReward}: Setting $t' = t-(k-1) = t - k +1$ and $i' = i - (k-1) = i - k +1$, and $s'_{t} := s_{t'}$, i.e. an index shift, we in fact have
+
+\begin{equation}
+	\mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
+																			s_{k-1} \sim d_{s_{k-1}}, \\
+																			\mu_{k-1},\dots,\mu_i
+																		\end{array} \Big]  = \sum\limits_{s \in S} \Big( \Pr\{ s_{k-1} = s | s_{k-1} \sim d_{s_{k-1}}\} \cdot \mathbb{E} \Big[ \sum\limits_{t'=0}^{i'} \gamma^{t'} r_{t'} \Big| \begin{array}{c}
+																			s'_0 = s, \\
+																			\mu_{k-1},\dots,\mu_i
+																		\end{array} \Big] \Big).
+\end{equation}
+
+Thus, the left hand side is the sum of functionals continuous in the control laws $\mu_{k-1},\dots,\mu_i$ and therefore continuous itself. Its maximum over the compact set $\Pi(S,A)^{i-k+2}$ is therefore well-defined.
+
+Since no reward can be affected by a control law applied later in time, we can rewrite
+
+\begin{equation}
+	\begin{array}{rcl}
+		& 	 &	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \sum\limits_{l=0}^{i-k+1} \gamma^l \mathbb{E}\Big[ r_{k-1+1} \Big| 	\begin{array}{c}
+																																																s_{k-1} \sim d_{s_{k-1}}, \\
+																																																\mu_{k-1},\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big) \\
+		& =	&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} \sim d_{s_{k-1}}, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  + \gamma \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_{k-1} \sim d_{s_{k-1}}, \\
+																																																\mu_{k-1},\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big).
+	\end{array}
+\end{equation}
+
+An initial state distribution $s_{k-1} \sim d_{s_{k-1}}$ at time $t = k-1$ together with a control law $a_{k-1} \sim \mu_{k-1}(s_{k-1},\cdot)$ induces a state distribution which we will denote by $s_k \sim d_{s_k}(d_{s_{k-1}},\mu_{k-1}) $ at time $t = k$. Since the distribution of $r_t$ only depends on $s_t$ and $a_t$ but not on previous parts of the state-action trajectory, we can rewrite that last line to see that
+
+\begin{equation}
+	\begin{array}{rcl}
+		& 	 &	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \sum\limits_{l=0}^{i-k+1} \gamma^l \mathbb{E}\Big[ r_{k-1+1} \Big| 	\begin{array}{c}
+																																																s_{k-1} \sim d_{s_{k-1}}, \\
+																																																\mu_{k-1},\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big) \\
+		& =	&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} \sim d_{s_{k-1}}, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  + \gamma \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(d_{s_{k-1}},\mu_{k-1}), \\
+																																																\mu_k,\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big).
+	\end{array}
+\end{equation}
+
+Due to the nested maxima, one would assume that the control laws $\mu_k,\dots,\mu_i$ achieving the inner maxima would be dependendent on the outer control law $\mu_{k-1}$ applied first. However, our induction assumption assures us that the inner maxima is achieved by the very control laws maximising the reward-to-go starting at $t = k$, that is, the control laws $\mu_k^*,\dots,\mu_i^*$ - \textit{simultaneously} for all initial state distributions $d_{s_k} = d_{s_k}(d_{s_{k-1}},\mu_{k-1})$ induced by varying $d_{s_{k-1}}$ and $\mu_{k-1}$:
+
+\begin{equation}
+	\begin{array}{rcl}
+		& 	&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} \sim d_{s_{k-1}}, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  + \gamma \max\limits_{(\mu_k,\dots,\mu_i) \in \Pi(S,A)^{i-k+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(d_{s_{k-1}},\mu_{k-1}), \\
+																																																\mu_k,\dots,\mu_i
+																																															\end{array} \Big] \Big) \Big) \\
+		& =	&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} \sim d_{s_{k-1}}, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  + \gamma  \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(d_{s_{k-1}},\mu_{k-1}), \\
+																																																\mu_k^*,\dots,\mu_i^*
+																																															\end{array} \Big] \Big)
+	\end{array}
+\end{equation}
+
+Further decomposing the expectation over the initial state distribution $d_{s_{k-1}}$ at time $t = k-1$ and making use of Lemma \ref{} from the appendix yields
+
+\begin{equation}
+	\begin{array}{rrccl}
+		& 	&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} \sim d_{s_{k-1}}, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  & + & \gamma \cdot \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(d_{s_{k-1}},\mu_{k-1}), \\
+																																																\mu_k^*,\dots,\mu_i^*
+																																															\end{array} \Big] \Big) \\
+		& =		&	\max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \sum\limits_{s \in S}^{} \Big(  \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} = s, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  & + & \gamma  \cdot \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(s_{k-1} = s,\mu_{k-1}), \\
+																																																\mu_k^*,\dots,\mu_i^*
+																																															\end{array} \Big] \Big) \\
+		&		&		& 	& \cdot  \Pr\{ s_{k-1} = s | s_{k-1} \sim d_{s_{k-1}} \} \Big) \Big) \\
+		& \le 	&	\sum\limits_{s \in S}^{} \Big( \max\limits_{\mu_{k-1} \in \Pi(S,A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} = s, \\
+																						\mu_{k-1}
+																					\end{array} \Big]  & + & \gamma  \cdot \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(s_{k-1} = s,\mu_{k-1}), \\
+																																																\mu_k^*,\dots,\mu_i^*
+																																															\end{array} \Big] \Big) \\
+		&		&		& 	& \cdot  \Pr\{ s_{k-1} = s | s_{k-1} \sim d_{s_{k-1}} \} \Big) \\
+		& = 	&	\sum\limits_{s \in S}^{} \Big( \max\limits_{\mu_a \in \Pi(\{s\},A)} \Big( \mathbb{E}\Big[ r_{k-1} \Big| \begin{array}{c}
+																						s_{k-1} = s, \\
+																						\mu_{k-1}(s,\cdot = \mu_a
+																					\end{array} \Big]  & + & \gamma  \cdot \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k} \gamma^l r_{k+l} \Big| \begin{array}{c}
+																																																s_k \sim d_{s_k}(s_{k-1} = s,\mu_{k-1}(s,\cdot) = \mu_a, \\
+																																																\mu_k^*,\dots,\mu_i^*
+																																															\end{array} \Big] \Big) \\
+		&		&		& 	& \cdot  \Pr\{ s_{k-1} = s | s_{k-1} \sim d_{s_{k-1}} \} \Big).
+	\end{array}
+\end{equation}
+
+Note that in the step yielding $\le$ we moved the maximisation inside the sum, maximising over each term individually. The last step is justified by the expectations inside the sum being constrained to the state $s_{k-1}$ being fixed at some arbitrary state $s^k \in S$. Thus, effectively, only the '$k$-th row' of $\mu_{k-1}$, namely $\mu_{k-1}(s^k,\cdot)$, is used in each expectation.
+
+\end{proof}
 
 \end{document}
