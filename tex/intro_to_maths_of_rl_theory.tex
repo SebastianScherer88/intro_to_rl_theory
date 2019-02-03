@@ -381,6 +381,12 @@ is continuous as a finite sum of continuous functions for any $s' \in S$, provid
 For each $t \in \mathbb{N}_0$, $i \ge t$, and starting state $s' \in S$, the reward $r_t$'s expectation $\mathbb{E}[r_t | s' = s_0, \pi(i)]$, taken over all trajectories starting at $s'$ and sampled according to some $\pi(i) \in \Pi(S,A)^i$, depends continuously on the guiding policy $\pi(i)$. As such, it attains its maximum on $\Pi(S,A)^i$.
 \end{cor}
 
+\begin{figure}
+  \includegraphics[width=\linewidth,height=8cm]{../graphics/control_law_trajectory_rewards.png}
+  \caption{Having arbitrarily ordered our state space into $\{s^1,s^2,\dots,s^{|S|} \} = S$, we show a sample trajectory, the associated probabilities and rewards while following $\mu_0,\dots,\mu_i$ for $i = 3$, $|S| = |A| = 3$. The sample trajectory is highlighted in magenta.}
+  \label{fig:boat1}
+\end{figure}
+
 \section{The discounted finite horizon problem}
 
 We dedicate this section to the formulation and solution of the so-called discounted finite horizon problem. We will use the results obtained in this section to solve the infinite horizon counterpart problem later.
