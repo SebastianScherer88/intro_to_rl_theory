@@ -385,46 +385,84 @@ For each $t \in \mathbb{N}_0$, $i \ge t$, and starting state $s' \in S$, the rew
 
 We dedicate this section to the formulation and solution of the so-called discounted finite horizon problem. We will use the results obtained in this section to solve the infinite horizon counterpart problem later.
 
-Let $0 < \gamma < 1$,$s' \in S$ a fixed but arbitrary starting state, and let $i \in \mathbb{N}$ be given. The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on starting at $s'$ at $t=0$, maximizes the induced finite sum of discounted expected rewards. To be more precise, putting
+Let $0 < \gamma < 1$, and let $\le j \le i$, $j,i \in \mathbb{N}$ be given. Let further $d_{s_j}$ be an arbitrary distribution on the state space $S$ at time $t = j$.
+
+The discounted finite horizon problem is the searching of a policy $\pi$ as discussed in section \ref{} that, conditioned on the starting state $s_j$ being distributed according to $s_j \sim d_{s_j}$ at $t=j$, maximizes the induced finite sum of remaining discounted expected rewards. To be more precise, putting
 
 \begin{equation}\label{eqFinDiscHorReward}
-		J(s',\pi(i)) := \sum\limits_{t=0}^i \mathbb{E}[ \gamma^t \cdot r_t | s_0 = s', \pi(i)] = \sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)],
+		J_{j,i}(d_{s_j},\pi(i)) := \sum\limits_{t=j}^i \mathbb{E}[ \gamma^{t-j} \cdot r_t | s_j \sim d_{s_j}, \pi(i)] = \sum\limits_{t=j}^i \gamma^{t-j} \cdot \mathbb{E}[ r_t | s_j \sim d_{s_j}, \pi(i)],
 \end{equation}
 
-our discounted finite horizon problem reduces to, given an arbitrary but fixed starting state $s' \in S$, finding
+our discounted finite horizon problem reduces to, given an arbitrary but fixed starting state distribution $s_j \sim d_{s_j}$, finding
 
 \begin{equation}\label{eqFinDiscHorProb}
-	\pi(i)^* := \argmax_{\pi(i) \in \Pi(S,A)^i} J(s',\pi(i)).
+	\pi(i)^* := \argmax_{\pi(i) \in \Pi(S,A)^{i+1}} J_{j,i}(d_{s_j},\pi(i)).
 \end{equation}
 
-The existence of a solution to problem \ref{eqFinDiscHorProb} follows more or less directly from our previous work.
+For $j=0$, we usually refer to the above problem simply as the \textit{finite horizon problem}. For $j = 1,\dots,i$ we usually refer to it as the \textit{reward-to-go from time j}. 
+
+Note that since the distribution at time $t = j$ is specified and states, actions and  rewards at times $t \ge j$ do not depend on any part of the state action trajectory prior to time $t = j$, the reward-to-go problem effectively is solved by finding appropriate control laws $\mu_j,\dots,\mu_i$, leaving the first $j$ control laws $\mu_0,\dots,\mu_{j-1}$ of the solution $\pi(i)$ unspecified and therefore variable.
+
+The existence of a solution to problem \ref{eqFinDiscHorProb} follows from the continuity results found in the previous section.
 
 \begin{prop}(Existence of a solution)\label{propExistenceFiniteSolution}
-	For any $i \in \mathbb{N}_0$, $s' \in S$, the discounted finite horizon problem has a solution in $\Pi(S,A)^{i+1}$.
+	For any $j,i \in \mathbb{N}_0$ with $j \le i$, initial distribution $d_{s_j}$ over the state space $S$, the reward-to-go problem has a solution in $\Pi(S,A)^{i+1}$. That is, there exists a policy $\pi^*(i) \in \Pi(S,A)^{i+1}$ such that
+
+\begin{equation}
+	\sum\limits_{t=j}^i \gamma^{t-j} \cdot \mathbb{E}[ r_t | s_j \sim d_{s_j}, \pi^*(i)] = \max_{\pi(i) \in \Pi(S,A)^{i+1}} J_{j,i}(d_{s_j},\pi(i)).
+\end{equation}
+
 \end{prop}
 
 \begin{proof}
-By Corollary \ref{corContinuousReward}, the mapping 
+We can shift the environment index to create an environment that has been 'fast-forwarded' by $j$ time steps by putting $s'_{t} = s_{t+j}$ and $r'_t = r_{t+j}$. The same is done for corresponding control laws, i.e. $\mu'_t = \mu'_{t + j}$. Thus, applying the $t$-th control law $\mu'_t$ of a policy $\pi'$ to state $s'_t$ in the fast forwarded environment is equivalent to applying $(t+j)$-th control law $\mu_t$ of a policy $\pi(i)$ to state $s_t$ in the original environment. 
+
+Applying Corollary \ref{corContinuousReward} to our fast forwarded environment, the mapping 
 
 \begin{equation}\label{contDiscExpRewSumMap}
 	\begin{array}{rccl}
-		J_i(s',\cdot): 	& \Pi(S,A)^{i+1} 	& \rightarrow 	& [0,i M] \\
-					& \pi(i)		& \mapsto 	& \sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E}[ r_t | s_0 = s', \pi(i)]
+		J_{i-j}(s',\cdot): 	& \Pi(S,A)^{i-j+1} 	& \rightarrow 	& [0,(i-j) M] \\
+					& \pi'(i)		& \mapsto 	& \sum\limits_{t=0}^{i-j} \gamma^t \cdot \mathbb{E}[ r'_t | s'_0 = s', \pi'(i-j)]
 	\end{array}
 \end{equation}
 
-is continuous as the sum of continuous functions, and therefore attains its maximum at some $\pi(i)^*$ in the compact normed space $(\Pi(S,A)^i,|\cdot|_{\mathbb{R}^i})$.
-\end{proof}
-
-From now on, we will denote the solution of the discounted finite horizon problem by $\pi^*(i)$, and we will denote the maximum discounted cumulative reward achieved by this solution as 
+is continuous as the sum of continuous functions. We can explicitly write out the specified initial state distribution $d_{s_j}$'s probabilities to see that
 
 \begin{equation}
-	J_i^*(s') := J_i(s',\pi(i)^*) = \max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} J_i(s',\pi(i))
+	\sum\limits_{t=0}^{i-j} \gamma^t \cdot \mathbb{E} \Big[ r'_t \Big| \begin{array}{c}
+																		s'_0 \sim d_{s_j}, \\
+																		\mu'_0,\dots,\mu'_{i-j}
+																	\end{array} \Big]  = \sum\limits_{t=0}^{i-j} \Big( \sum\limits_{s' \in S} \Big( \Pr\{ s'_0 = s' | s'_0 \sim d_{s_j}\} \cdot \gamma^t \cdot \mathbb{E} \Big[ r'_t \Big| \begin{array}{c}
+																			s'_0 = s', \\
+																			\mu'_0,\dots,\mu'_{i-j}
+																		\end{array} \Big] \Big) \Big)
 \end{equation}
 
-Making use of some auxiliary results from calculus layed out in the appendix, we can do better and give a more constructive approach. Informally speaking, the solution to \ref{eqFinDiscHorProb} can be obtained by 'rolling the reward up from the back'. This is formalized in the following
+is continuous in $\mu'_0,\mu'_{i-j}$ and therefore attains its maximum ${\mu'}^*_0,\dots,{\mu'}^*_{i-j}$ on the compact set $\Pi(S,A)^{i-j+1}$. But since by construction
 
-\begin{prop}(Optimal cost-to-go)\label{lemBuildingFiniteSolution}
+\begin{equation}
+	\sum\limits_{t=0}^i \gamma^t \cdot \mathbb{E} \Big[ r_t \Big| \begin{array}{c}
+																		s_j \sim d_{s_j}, \\
+																		\mu_j,\dots,\mu_i
+																	\end{array} \Big]  = \sum\limits_{t=j}^{i-j} \gamma^t \cdot \mathbb{E} \Big[ r'_t \Big| \begin{array}{c}
+																		s'_0 \sim d_{s_j}, \\
+																		\mu'_0,\dots,\mu'_{i-j}
+																	\end{array} \Big],
+\end{equation}
+
+it is clear that 
+
+\begin{equation}
+	\pi^*(i) = (\mu_0,\dots,\mu_{j-1},\mu^*_j,\dots,\mu^*_i) = (\mu_0,\dots,\mu_{j-1},{\mu'}^*_0,\dots,{\mu'}^*_{i-j})
+\end{equation}
+
+is a policy of length $i$ that achieves the $\max$ of the reward-to-go from time $j$ problem for any control laws $\mu_0,\dots,\mu_{j-1} \in \Pi(S,A)$. Note that the first $j+1$ control laws remain unspecified since they do not impact on the reward terms considered by the reward-to-go from time $j$, and can therefore be chosen at wish.
+
+\end{proof}
+
+Now that our problem is well-defined and guaranteed to have a solution, we take a closer look at finding the optimal policies. In particular, because of the environment's and the agent's markov property, the reward-to-go from time $j$ is closely connected with the reward-to-go from time $j-1$. In fact, a series of control laws forming the solution to the latter is also a solution to the former, plus an additional optial control law at time $j-1$. This is the so-called principle of optimality: An optimal path from A to C via B must also contain an optimal path from B to C. We make formalize this in the next
+
+\begin{thm}(Principle of optimality)\label{thmBuildingFiniteSolution}
 	Consider the discounted finite horizon problem as defined in \ref{eqFinDiscHorProb}. For all $s^1,\dots,s^{|S|} \in S$, define
 \begin{equation}
 	\begin{array}{clll}
@@ -450,30 +488,29 @@ $k=1,\dots,|S|$. Define the optimal control law at time j as
 				\end{array}\right).
 \end{equation}
 
-Let $0\le j \le i$ be fixed but arbitrary, and let $d_{s_j}$ be any distribution on the state space $S$. Then 
+Let $0\le j \le i$ be fixed but arbitrary, and let $d_{s_j}$ be any distribution on the state space $S$. Then any policy with arbitrary first $j$ policies of the form
+
+\begin{equation}
+	\pi^*(i) = (\mu_0,\dots,\mu_{j-1},\mu_j^*,\dots,\mu_i^*)
+\end{equation}
+
+satisfies
 
 \begin{equation}
 	\mathbb{E}\Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
 														s_j \sim d_{s_j} \\
-														(\mu_j^*,\dots,\mu^*_i)
-													\end{array} \Big] = \max\limits_{(\mu_j,\dots,\mu_i) \in \Pi(S,A)^{i-j+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
-													s_j \sim d_{s_j} \\
-													(\mu_j,\dots,\mu_i)
-												\end{array} \Big] \Big).
+														\pi^*(i)
+													\end{array} \Big] = \max_{\pi(i) \in \Pi(S,A)^{i+1}} J_{j,i}(d_{s_j},\pi(i)). %\max\limits_{(\mu_j,\dots,\mu_i) \in \Pi(S,A)^{i-j+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
+				%									s_j \sim d_{s_j} \\
+					%								(\mu_j,\dots,\mu_i)
+						%						\end{array} \Big] \Big).
 \end{equation}
 
-In other words, given any intial distribution $d_{s_j}$ over state $s_j$ at time $t=j$, the control laws $\mu_j^*,\mu_{j+1}^*,\dots,\mu_i^*$ as defined above achieve the optimal cost-to-go reward, that is, they maximise the expression
+In other words, given any initial distribution $d_{s_j}$ over state $s_j$ at time $t=j$, the control laws $\mu_j^*,\mu_{j+1}^*,\dots,\mu_i^*$ as defined above achieve the optimal cost-to-go reward from time $j$.
 
-\begin{equation}
-	 \mathbb{E} \Big[ \sum\limits_{l=0}^{i-j} \gamma^l r_{j+l} \Big| 	\begin{array}{c}
-													s_j \sim d_{s_j} \\
-													(\mu_j,\dots,\mu_i)
-												\end{array} \Big].
-\end{equation}
+\end{thm}
 
-\end{prop}
-
-over $(\mu_j,\dots,\mu_i) \in \Pi(S,A)^{i-j+1}$. Note that the above claim implies that the rewards collected from point $t=j$ onwards until the end $t=i$ can be maximised by following a fixed set of control laws that don't depend on your starting state distribution $d_{s_j}$ of $s_j$. In particular, these control laws are the same for any fixed starting state $s_j = s'$, $s' \in S$. As the following proof will show, this is achieved by making use of the markov property - specifically, that rewards only depend on the most recent state and action, respectively, but not on the more distant past. It is this property that allows us to define the the optimal control laws $\mu_j^*$ iteratively, effectively rolling up the rewards process from the back.
+Note that the above claim implies that the rewards collected from point $t=j$ onwards until the end $t=i$ can be maximised by following a fixed set of control laws that don't depend on your starting state distribution $d_{s_j}$ of $s_j$. In particular, these control laws are the same for any fixed starting state $s_j = s'$, $s' \in S$. As the following proof will show, this is achieved by making use of the markov property - specifically, that rewards only depend on the most recent state and action, respectively, but not on the more distant past. It is this property that allows us to define the the optimal control laws $\mu_j^*$ iteratively, effectively rolling up the rewards process from the back.
 
 \begin{proof}
 
@@ -483,11 +520,13 @@ We will show the claim by induction over the delayed start time index $j$. Let $
 	\mu_i^*(s^k,\cdot) := \argmax\limits_{\mu_a \in \Pi(\{s^k\},A)} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i ] ).
 \end{equation}
 
-We can then see that
+Since the specified distribution $d_{s_i}$ at time $t = i$ renders the first $i$ control laws of $\pi(i)$ irrelevant when considering the expectation of $r_i$, we can see that
 
 \begin{equation}
 	\begin{array}{rcl}
-		\max\limits_{\mu_i \in \Pi(S,A)} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i ] ) 	& = 	& \max\limits_{\mu_i \in \Pi(S,A)} \Big( \sum\limits_{s \in S} \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \mathbb{E}[ r_i | s_i = s, \mu_i ] \Big) \\
+		\max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} \Big(J_{i,i}(d_{s_i},\pi(i)) \Big) & := 	& \max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \pi(i) ] ) \\
+			& = 	& \max\limits_{\mu_i \in \Pi(S,A)} ( \mathbb{E}[ r_i | s_i \sim d_{s_i}, \mu_i ] ) \\
+		 	& = 	& \max\limits_{\mu_i \in \Pi(S,A)} \Big( \sum\limits_{s \in S} \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \mathbb{E}[ r_i | s_i = s, \mu_i ] \Big) \\
 																					& \le 	& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \max\limits_{\mu_i \in \Pi(S,A)} (\mathbb{E}[ r_i | s_i = s, \mu_i ]) \Big) \\
 																					& = 	& \sum\limits_{s \in S} \Big( \Pr\{ s_i = s | s_i \sim d_{s_i} \} \cdot \max\limits_{\mu_a \in \Pi(\{s\},A)} \Big(\mathbb{E}\Big[ r_i \Big| \begin{array}{c}
 																																																	s_i = s, \\
@@ -504,11 +543,18 @@ We can then see that
 
 Since the $\max$ of the reward-to-go over all partial control law sequences can not be smaller than the expectation achieved by one specific sequence, we naturally have $\ge$ as well. From this follows equality, marking our induction start. 
 
-For the induction step, let's assume Eq. \ref{} holds for $j = k$ for some $k$, $1 \le k \le i$. We will show that it then also holds for $j = k - 1$. Let again $d_{s_k}$ be any distribution over the state $s_k$ at time $t = k$, the time we start accumulating rewards in this Proposition's cost-to-go scenario. Denote by $\mu_k,\dots \mu_i$ the control laws achieving optimal reward-to-go expectations as per our induction step's assumption. We can write
+For the induction step, let's assume Eq. \ref{} holds for $j = k$ for some $k$, $1 \le k \le i$. We will show that it then also holds for $j = k - 1$. Let again $d_{s_k}$ be any distribution over the state $s_k$ at time $t = k$, the time we start accumulating rewards in this Proposition's cost-to-go scenario. Denote by $\mu_k,\dots \mu_i$ the control laws achieving optimal reward-to-go expectations as per our induction step's assumption. Since the specified distribution $d_{s_{k-1}}$ at time $t = k-1$ renders the first $k-1$ control laws of $\pi(i)$ irrelevant when considering the expectations of $r_{k-1},\dots,r_i$, we can see that
+
 
 \begin{equation}
 	\begin{array}{rcl}
-			&	&	\max\limits_{(\mu_{k-1},\dots,\mu_i) \in \Pi(S,A)^{i-k+2}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
+			&	&	\max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} \Big(J_{k-1,i}(d_{s_{k-1}},\pi(i)) \Big) \\
+			
+			& :=	&	\max\limits_{\pi(i) \in \Pi(S,A)^{i+1}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
+																																						s_{k-1} \sim d_{s_{k-1}}, \\
+																																						\pi(i)
+																																					\end{array} \Big] \Big) \\
+			& =	&	\max\limits_{(\mu_{k-1},\dots,\mu_i) \in \Pi(S,A)^{i-k+2}} \Big( \mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
 																																						s_{k-1} \sim d_{s_{k-1}}, \\
 																																						\mu_{k-1},\dots,\mu_i
 																																					\end{array} \Big] \Big) \\
@@ -519,19 +565,7 @@ For the induction step, let's assume Eq. \ref{} holds for $j = k$ for some $k$, 
 	\end{array}
 \end{equation}
 
-making use of Lemma \ref{} in the appendix. Note that the first expression is well defined as the maximum of a functional that is continuous on the space of control laws $(\mu_{k-1},\dots,\mu_i) \in \Pi(S,A)^{i-k+2}$. The continuity is yet another consequence of Corollary \ref{corContinuousReward}: Setting $t' = t-(k-1) = t - k +1$ and $i' = i - (k-1) = i - k +1$, and $s'_{t} := s_{t'}$, i.e. an index shift, we in fact have
-
-\begin{equation}
-	\mathbb{E} \Big[ \sum\limits_{l=0}^{i-k+1} \gamma^l r_{k-1+l} \Big| \begin{array}{c}
-																			s_{k-1} \sim d_{s_{k-1}}, \\
-																			\mu_{k-1},\dots,\mu_i
-																		\end{array} \Big]  = \sum\limits_{s \in S} \Big( \Pr\{ s_{k-1} = s | s_{k-1} \sim d_{s_{k-1}}\} \cdot \mathbb{E} \Big[ \sum\limits_{t'=0}^{i'} \gamma^{t'} r_{t'} \Big| \begin{array}{c}
-																			s'_0 = s, \\
-																			\mu_{k-1},\dots,\mu_i
-																		\end{array} \Big] \Big).
-\end{equation}
-
-Thus, the left hand side is the sum of functionals continuous in the control laws $\mu_{k-1},\dots,\mu_i$ and therefore continuous itself. Its maximum over the compact set $\Pi(S,A)^{i-k+2}$ is therefore well-defined.
+making use of Lemma \ref{} in the appendix.
 
 Since no reward can be affected by a control law applied later in time, we can rewrite
 
@@ -729,7 +763,7 @@ Collapsing the sum into the initial distribution over $s_{k-1}$ at time $t = k-1
 	\end{array}
 \end{equation}
 
-This shows $\le$ in the induction step. Since the $max$ of the reward-to-go starting at time $t = k-1$ taken over control laws $\mu_{k-1},\dots,\mu_i$ can not be smaller than the value achieved by $\mu_{k-1}^*,\dots,\mu_i^*$, we have shown that equality holds. This completes the induction step and proves the claim for all $t = 0,\dots,i$.
+This shows $\le$ in the induction step. Since the $max$ of the reward-to-go starting at time $t = k-1$ taken over control laws $\mu_{k-1},\dots,\mu_i$ can not be smaller than the value achieved by $\mu_{k-1}^*,\dots,\mu_i^*$, we have shown that equality holds. This completes the induction step and proves the claim for all $j = 0,\dots,i$.
 
 \end{proof}
 
