@@ -775,4 +775,35 @@ This shows $\le$ in the induction step. Since the $max$ of the reward-to-go star
 
 While the proof of this principle was somewhat technical, we hope that the following picture illustrates the intuitive idea behind it.
 
+INSERT OPTIMAL POLICY FOR REWARD-TO-GO SCENARIOS HERE.
+
+We will now reformulate the above results in a more operator friendly way. More precisely, we will define value functions for each point in time $t$ that will assign the maximal achievable reward-to-go to each potential initial state $s \in S$. The knowledge of optimal policies for these sub-problems will be of use.
+
+\begin{prop}(Maixmal reward-to-go value functions)
+	Let $i \in \mathbb{N}_0$ and let $j=-1,0,\dots,i$. Let further $d_{s_{i-j}}$ be a distribution on the state space $S$. For $j = -1$, set
+	\begin{equation}
+		\hat{J}_{j,i}(d_{s_j}) := 0
+	\end{equation}
+	for all policies $\pi(i) \in \Pi(S,A)^{i+1}$. For $j = 0,\dots,i$, set
+	\begin{equation}
+		\hat{J}_{j,i}(d_{s_{i-j}}) := \max\limits_{\mu_{i-j} \in \Pi(S,A)} \Big(\mathbb{E}\Big[r_{i-j} + \gamma \cdot \hat{J}_{j-1,i}(d_{s_{i-j+1}}) \Big| \begin{array}{c}
+																				s_{i-j} \sim d_{s_{i-j}}, \mu_{i-j} \\
+																				d_{s_{i-j+1}} = d_{s_{i-j+1}}(d_{s_{i-j}},\mu_{i-j})
+																			\end{array} \Big] \Big).
+	\end{equation}
+
+Then for all $j=i,\dots,0$, we have
+
+\begin{equation}
+	\hat{J}_{i-j,i}(d_{s_j}) = \max_{\pi(i) \in \Pi(S,A)^{i+1}} J_{j,i}(d_{s_j},\pi(i)).
+\end{equation}
+\end{prop}
+
+In other words, the functional $\hat{J}_{i-j,i}(d_{s_j})$ gives the maximal achievable reward-to-go from time $t = j$ given an initial state distribution $s_{j} \sim d_{s_j}$. The proof will show that this maximal reward-to-go is achieved by precisely the optimal control laws $(\mu_0,\dots,\mu_i)$ constructed in Theorem \ref{}.
+
+\begin{proof}
+We will use an induction argument for the start index $j$. For the induction start, let $j=0$, and let $d_{s_i}$ be any arbitrary but fixed distribution on the space state $S$. 
+\end{proof}
+
+
 \end{document}
