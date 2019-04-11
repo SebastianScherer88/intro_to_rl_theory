@@ -434,7 +434,7 @@ where $\Omega^{t+k}_s := \{\omega = (s_t,a_t,s_{t+1},a_{t+1},\dots) \in \Omega |
 
 Having said all that, let us have a closer look at the recursive nature of both $V^{\pi}$ and $Q^{\pi}$ - a feature we will exploit throughout the rest of this transcript.
 
-\begin{prop}{(Parametrized bellman equations)}
+\begin{prop}{(Parametrized bellman equations)}\label{prop_paramBellmanEqs}
 	Let $\pi$ be an arbitrary policy, and let $V^{\pi}$ and $Q^{\pi}$ its associated (action-)value functions. Then the following identities hold:
 	\begin{enumerate}
 		\item $V^{\pi}(s) = \sum_{a} \pi(s,a) \sum_{s'} P_{s,s'}^a ( R_{s,s'}^a + \gamma V^{\pi}(s') ) $
@@ -478,11 +478,15 @@ Note that we used the markov property which allowed us to drop past states and a
 
 Remembering the definitions of $P_{s,s'}^a$ and $R_{s,s'}^a$, these parametrizations can be rewritten in a slightly more compact way:
 
-$$ V^{\pi}(s) =  \mathbb{E}_{\pi}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s ] $$
+\begin{equation}\label{eq_valueRecursion}
+	V^{\pi}(s) =  \mathbb{E}_{\pi}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s ]
+\end{equation}
 
 and 
 
-$$ Q^{\pi}(s) = \mathbb{E}_{\pi}[r_t + \gamma Q^{\pi}(s_{t+1},a_{t+1}) | s_t = s, a_t = a]. $$
+\begin{equation}\label{eq_actValRecursion}
+	Q^{\pi}(s) = \mathbb{E}_{\pi}[r_t + \gamma Q^{\pi}(s_{t+1},a_{t+1}) | s_t = s, a_t = a].
+\end{equation}
 
 These are the 'standard' bellman equations.
 
@@ -666,7 +670,7 @@ Informally speaking, taking an infinite number of actions according to $\pi_u$ b
 
 The above theorem states that $\pi_u \ge_V \pi_l$ holds whenever $ \mathbb{E}_{a \sim \pi_u(s,\cdot )}[Q^{\pi_l}(s,a)] \ge V^{\pi_l}(s)$ for all $s \in S$, then $\pi_u \ge_V \pi_l.$ Can we tweak these assumptions to guarantee actual improvement over $\pi_l$, i.e. $\pi_u >_V \pi_l$?
 
-\begin{thm}{(Improved policy improvement theorem)}
+\begin{thm}{(Improved policy improvement theorem)}\label{thm_polImp2}
 	Let $\pi_u, \pi_l$ be two different policies for a finite MDP.
 	\begin{enumerate}
 		\item If $$ \mathbb{E}_{a \sim \pi_u(s,\cdot )}[Q^{\pi_l}(s,a)] = V^{\pi_l}(s)$$ for all $s \in S$, then $$\pi_u =_V \pi_l.$$
@@ -697,8 +701,8 @@ This means that a \textit{greedy} policy might not be as shortsighted, and there
 
 Let us therefore have a closer look at a greedy policy's value function.
 
-\begin{cor}{(Greedy policy values)}
-	Let $\pi_g$ be a \textit{greedy} policy for a finite MDP. Then $$V^{\pi_g} \equiv max_{a \in A} Q^{\pi_g}(\cdot,a).$$
+\begin{cor}{(Greedy policy values)}\label{cor_greedPolVals}
+	Let $\pi_g$ be a \textit{greedy} policy for a finite MDP. Then $$V^{\pi_g} \equiv \max\limits_{a \in A} Q^{\pi_g}(\cdot,a).$$
 \end{cor}
 
 \begin{proof}
@@ -716,7 +720,7 @@ In other words, a greedy policy's value function is just the maximum of its acti
 
 The following result shows that any group of policies greedy w.r.t some $Q$ function are of the same quality. Unsurprisingly, the identical strategy of local maximisation does not lead to great deal of variability in policies' performances. It also shows that any policy that is not \textit{greedy} can be improved by making it \textit{greedy}.
 
-\begin{lem}{(Greedy policy improvement)}
+\begin{lem}{(Greedy policy improvement)}\label{lem_greedPolImp}
 Let $\pi_g$ and $\pi_c$  be policies for finite MDP, and let $\pi_g$ be \textit{Q}$^{\pi_c}$\textit{-greedy}. If $\pi_c$ is \textit{Q}$^{\pi_c}$\textit{-greedy}, too, then $\pi_g =_V \pi_c$. Otherwise, $\pi_g >_V \pi_c$.
 \end{lem}
 
@@ -764,9 +768,7 @@ Let us begin this subsection by formalizing the concept of an optimal policy.
 
 In other words, a policy $\pi^*$ whose value function $V^{\pi^*}$ dominates the value functions $V^{\pi}$ of all other policies is optimal for the given finite MDP, and what we consider 'best'. This approach seems sensible, since optimality of a policy according to the above definition maximises the expected cumulative reward (that is what a policy's value function represents).
 
-There's some good and some bad news. The good news is that for every finite MDP, there is at least on optimal policy $\pi^*$. The bad news is that that the proof for this existence seems kind of complicated - which is probably the reason it's omitted from pretty much every "online" source I have found so far. I'm currently reading a book by Bertseklis (?) on that subject, so hopefully that will point me in the right direction.
-
-For now, we will just assume we have guaranteed the existence of an optimal policy $\pi^*$ for every finite MDP, and go from there. This brings us to the next subsection.
+It is not at all clear, or even intuitive, that such an optimal policy need exist for a given finite MDP. As we will see later in this section, an optimal policy indeed does exist under the conditions treated in this article. Somewhat unintuitively, will first analyse the behaviour of surmised optimal policies, and use these properties to show to then prove their existence. This approach brings us to the next subsection.
 
 \subsection{Behavioural issues}
 
@@ -805,7 +807,7 @@ Knowing that all optimal policies share the same value and action value function
 Corollary \ref{cor_sameOptPol} guarantees the welldefinedness of the above terms. We go on to show a useful property of the optimal value function $V^*$.
 
 \begin{lem}{(Different kind of optimum)}\label{cor_optValMaxS}
-	For each $s \in S$ , the following hold:
+	For each $s \in S$,$a \in A$ , the following hold:
 	\begin{enumerate}
 		\item \begin{equation}\label{eq_optValMax} V^*(s) = \max_{\pi \in \Pi} V^{\pi}(s) \end{equation}
 		\item \begin{equation}\label{eq_optActValMax} Q^*(s,a) = \max_{\pi \in \Pi} Q^{\pi}(s,a) \end{equation}
@@ -866,5 +868,69 @@ In other words, both the optimal value function and the optimal action-value fun
 
 	Since $(s,a) \in S \times A$ was arbitrary, $\ge$ and $\le$ together yield \ref{eq_optActValMax}.
 \end{proof}
+
+It is worth reminding ourselves that this property assumes the existence of an optimal policy $\pi*$ with corresponding value and action value functions $V^{\pi^*} = V^*$, $Q^{\pi^*}=Q^*$, respectively. In other words, the right hand sides of both identities are well defined, but there is no guarantee that the policy counterpart, as implied by the left hand sides, exists.
+
+We next show that greedyness is a necessary condition for a policy to be optimal.
+
+\begin{lem}{(Necessary conditions for optimal policies)}\label{lem_necOptCond}
+	Let $\pi^*$ be an optimal policy. Then $\pi^*$ is greedy.
+\end{lem}
+
+\begin{proof}
+	Assume that $\pi^*$ isn't greedy. By setting
+
+	\begin{equation}
+		\pi_{imp}(s,a) :=	\begin{cases}
+							\frac{1}{|maxact^{Q^{\pi*}}(s)|}, 	&	 a \in maxact^{Q^{\pi^*}} \\
+							0 ,	&	a \notin maxact^{Q^{\pi^*}}, \\ 
+						\end{cases}
+	\end{equation}
+
+we can see that $\pi_{imp}$ and $\pi^*$ satisfy the conditions of the Improved Policy improvement Theorem \ref{thm_polImp2}, implying that $\pi_{imp}$ is $Q^{\pi^*}$ greedy. Applying Lemma \ref{lem_greedPolImp} therefore yields
+
+\begin{equation}
+	\pi_{imp} >_V \pi^*,
+\end{equation}
+
+clearly a violation of our optimality assumption on $\pi^*$ requiring
+
+\begin{equation}
+	V^{\pi^*}(s) \ge V^{\pi}(s)
+\end{equation}
+
+for all $s \in S$, $\pi \in \Pi$. Hence, $\pi^*$ must be greedy.
+
+\end{proof}
+
+As we will see shortly, this is not just a sufficient condition, but indeed a necessary one. Before we do so, we will need to take a slightly different angle on greedy policy behaviour - that of operator theory. 
+
+For some $\pi \in \Pi$, consider the original \emph{Bellman optimality equation} given by
+
+\begin{equation}\label{eq_bellmanOpt}
+	Q^{\pi}(s,a) \overset{!}{=} \mathbb{E}[r_t + \gamma \max\limits_{a'} Q(s_{t+1},a') | s_t = s, a_t = a].
+\end{equation}
+
+We next show that a policy $\pi$ satisifies this identity holds true for greedy policies.
+
+\begin{lem}{(Bell optimality equations)}\label{lem_bellmanOptEqs}
+	Let $\pi \in \Pi$ be an arbitrary policy. If $\pi$ is greedy then it satifies the Bellman optimality equation \ref{eq_bellmanOpt}.
+\end{lem}
+
+\begin{proof}
+	Let $\pi$ be greedy. By one of our early results, namely Proposition \ref{prop_qVRelShips} and Corollary \ref{cor_greedPolVals}, we clearly have
+
+\begin{equation}
+	\begin{array}{rcl}
+		Q^{\pi}(s,a) 	&	=	& \mathbb{E}[r_t + \gamma V^{\pi}(s_{t+1}) | s_t = s, a_t = a] \\
+					&	=	& \mathbb{E}[r_t + \gamma \max\limits_{a' \in A} Q^{\pi}(s_{t+1},a') | s_t = s, a_t = a].
+	\end{array}
+\end{equation}
+
+\end{proof}
+
+\subsection{The Bellman operator}
+
+This is 
 
 \end{document}
