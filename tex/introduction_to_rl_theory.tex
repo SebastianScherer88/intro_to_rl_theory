@@ -969,8 +969,8 @@ The above result provides the perfect frame work to revisit Bellman's optimality
 
 where the image $B_{\mathbb{Q}}(Q)$ of $Q$ under $B_{\mathbb{Q}}$ is given by
 
-\begin{equation}
-	B_{\mathbb{Q}}(s,a) := \mathbb{E}[r_t + \gamma \max\limits_{a'} Q(s_{t+1},a') | s_t = s, a_t = a],
+\begin{equation}\label{eq_imBellOp}
+	B_{\mathbb{Q}}(Q)(s,a) := \mathbb{E}[r_t + \gamma \max\limits_{a'} Q(s_{t+1},a') | s_t = s, a_t = a],
 \end{equation}
 
 $s \in S$, $a \in A$. Note that $B_{\mathbb{Q}}$ is well-defined due to $r_t \ge 0$ fr any sensible $t$. It is also worth noting that for $B_{\mathbb{Q}}$ to be applied, no policy $\pi$ needs to be specified. Indeed, $Q$ does not even need to be an actual action-value function derived from some policy $\pi$ (although it usully will be - see below sections). All it requires is a function mapping state-action pairs to the non-negative part of the real numbers.
@@ -992,11 +992,34 @@ A word of warning: Our notation $\mathbb{Q^*}$ heavily implies that we are deali
 \begin{proof}
 	We will prove the claim by showing that $B_{\mathbb{Q}}$ is a contraction on $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$ and then apply the Banach Fixed Point Theorem (see appendix). In other words, we need to show 
 
-\begin{equation}
+\begin{equation}\label{eq_contrCond}
 	|B_{\mathbb{Q}}(Q_1) - B_{\mathbb{Q}}(Q_2)|_{\infty} < c \, |Q_1 - Q_2|_{\infty}
 \end{equation}
 
-for some $0 < c <1$ and any pair $Q_1,Q_2 \in \mathbb{Q}_{S,A}$. Applying 
+for some $0 < c <1$ and any pair $Q_1,Q_2 \in \mathbb{Q}_{S,A}$. Noting that we can rewrite
+
+\begin{equation}
+	\begin{array}{rcl}
+	B_{\mathbb{Q}}(Q)(s,a) 	& =	& \mathbb{E}[r_t + \gamma \max\limits_{a'} Q(s_{t+1},a') | s_t = s, a_t = a] \\
+						& =	& \sum\limits_{s' \in S} P_{s,s'}^a \big( R_{s,s'}^a + \gamma \max\limits_{a' \in A} Q(s',a') \big),
+	\end{array}
+\end{equation}
+
+we see that
+
+\begin{equation}
+	\begin{array}{rcl}
+		|B_{\mathbb{Q}}(Q_1) - B_{\mathbb{Q}}(Q_2)|_{\infty} & =	& \max\limits_{(s,a) \in S \times A} \left| \sum\limits_{s' \in S} P_{s,s'}^a \gamma \, \Big( \max\limits_{a' \in A} Q_1(s',a') - \max\limits_{a' \in A} Q_2(s',a') \Big) \right| \\
+		& \le &  \gamma \max\limits_{(s,a) \in S \times A} \left( \sum\limits_{s' \in S} P_{s,s'}^a \, \Big| \max\limits_{a' \in A} Q_1(s',a') - \max\limits_{a' \in A} Q_2(s',a') \Big| \right) \\
+		& \le &  \gamma \max\limits_{(s,a) \in S \times A} \left( \sum\limits_{s' \in S} P_{s,s'}^a \, \max\limits_{a' \in A} \Big| Q_1(s',a') - Q_2(s',a') \Big| \right) \\
+		& \le &  \gamma \max\limits_{(s,a) \in S \times A} \left( \sum\limits_{s' \in S} P_{s,s'}^a \, \max\limits_{(s'',a') \in S \times A} \Big| Q_1(s'',a') - Q_2(s'',a') \Big| \right) \\
+		& =	&  \gamma \max\limits_{(s,a) \in S \times A} \left( \sum\limits_{s' \in S} P_{s,s'}^a \, \Big| Q_1 - Q_2 \Big|_{\infty} \right) \\
+		& =	&  \gamma  \, \Big| Q_1 - Q_2 \Big|_{\infty}. \\
+	\end{array}
+\end{equation}
+
+Since $0 < \gamma < 1$, there is a $\gamma < c < 1$ such that equation \ref{eq_contrCond} holds, proving $B_{\mathbb{Q}}$ is a contraction on $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$. By the Banach Fixed Point Theorem it has a unique fixed point $Q^* \in \mathbb{Q}_{S,A}$.
+
 \end{proof}
 
 \end{document}
