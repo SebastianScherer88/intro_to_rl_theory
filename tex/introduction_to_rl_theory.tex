@@ -28,6 +28,8 @@
 \usepackage{array} % for better arrays (eg matrices) in maths
 \usepackage{amsfonts} % for maths fonts
 \usepackage{amsmath} % for mathy text templates (propositions, theorems etc.)
+\usepackage{mathtools}
+\usepackage{mathabx}
 \usepackage{amsthm} % proof env
 \usepackage[hidelinks]{hyperref} % clickable, interactive references to equations, pages etc
 \usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
@@ -903,8 +905,6 @@ for all $s \in S$, $\pi \in \Pi$. Hence, $\pi^*$ must be greedy.
 
 \end{proof}
 
-As we will see shortly, this is not just a sufficient condition, but indeed a necessary one. Before we do so, we will need to take a slightly different angle on greedy policy behaviour - that of operator theory. 
-
 For some $\pi \in \Pi$, consider the original \emph{Bellman optimality equation} given by
 
 \begin{equation}\label{eq_bellmanOpt}
@@ -931,6 +931,72 @@ We next show that a policy $\pi$ satisifies this identity holds true for greedy 
 
 \subsection{The Bellman operator}
 
-This is 
+In this section, we will develop a slightly different view point on the action-value function of a policy - in particular, the action value function of greedy policies. We ask the reader to bear with us on this seemingly sudden deviation from our path in the hope that these results' benefits will become apparent soon enough. To this end, consider the set of non-negative valued functions mapping into $\mathbb{R}^+$, that is, functions of the form
+
+\begin{equation}\label{eq_actStateSet}
+	\mathbb{Q}_{S,A} := \{ Q: (S,A) \mapsto \mathbb{R}^+_0\}
+\end{equation}
+
+equipped with the maximum norm
+
+\begin{equation}
+	|Q|_{\infty} := \max\limits_{(s,a) \in S \times A} |Q(s,a)|.
+\end{equation}
+
+Since both state and action states are finite, respectively, we can choose an arbitrary ordering of actions and states $A = \{a_1,\dots,a_{|A|}\}$ and $S = \{s_1,\dots,s_{|S|}\}$. This in turn allows us to put an ordering on the state-action pairs $(s,a)_1 = (s_1,a_1), (s,a)_2 = (s_1,a_2),\dots,(s,a)_{n_{S,A}} = (s_{|S|},a_{|A|})$, where $n_{S,A}:=|S|\cdot|A|$. Using this ordering, we can embedd our set of action-value functions $\mathbb{Q}_{S,A}$ into the normed space $(\mathbb{R}^{n_{S,A}},|\cdot|_{\infty})$ via the canonical mapping
+
+\begin{equation}
+	\begin{array}{rrcl}
+		E: 	& \mathbb{Q}_{S,A}	& \xhookrightarrow	&	\mathbb{R^{n_{S,A}}} \\
+			& Q				& \mapsto			&	(Q((s,a)_1),\dots,Q((s,a)_{n_{S,A}}).
+	\end{array}
+\end{equation}
+
+Thus, we can interpret our action-value functions as a subset of the Banach space $(\mathbb{R}^{n_{S,A}},|\cdot|_{\infty})$. It can easily be shown that $\mathbb{Q}_{S,A} \subset \mathbb{R}^{n_{S,A}}$ is a closed subset w.r.t $|\cdot|_{\infty}$. Since closed subspaces of complete spaces are complete themselves w.r.t the parent norm, we have obtained the following
+
+\begin{lem}\label{lem_compActStateVals}
+	Let $\mathbb{Q}_{S,A}$ be defined as in equation \ref{eq_actStateSet}. Then $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$ is a Banach space.
+\end{lem}
+
+The above result provides the perfect frame work to revisit Bellman's optimality equation from an operator theory point of view. Consider the non-linear operator on $\mathbb{Q}_{S,A}$ defined by
+
+\begin{equation}
+	\begin{array}{rrcl}
+	B_{\mathbb{Q}}: 	& \mathbb{Q}_{S,A} 	& \rightarrow	& \mathbb{Q}_{S,A} \\
+					& Q				& \mapsto 	& B_{\mathbb{Q}} 
+	\end{array}
+\end{equation}
+
+where the image $B_{\mathbb{Q}}(Q)$ of $Q$ under $B_{\mathbb{Q}}$ is given by
+
+\begin{equation}
+	B_{\mathbb{Q}}(s,a) := \mathbb{E}[r_t + \gamma \max\limits_{a'} Q(s_{t+1},a') | s_t = s, a_t = a],
+\end{equation}
+
+$s \in S$, $a \in A$. Note that $B_{\mathbb{Q}}$ is well-defined due to $r_t \ge 0$ fr any sensible $t$. It is also worth noting that for $B_{\mathbb{Q}}$ to be applied, no policy $\pi$ needs to be specified. Indeed, $Q$ does not even need to be an actual action-value function derived from some policy $\pi$ (although it usully will be - see below sections). All it requires is a function mapping state-action pairs to the non-negative part of the real numbers.
+
+What does any of this have to do with our quest of finding and constructing (and, not to forget, proving the existence of) some optimal policy $\pi^*$? Well, we know that greedyness is a necessary condition for optimality (Lemma \ref{lem_necOptCond}), and that satisfying the Bellman optimality equation is a necessary condition for greedyness (Lemma \ref{lem_bellmanOptEqs}). To extend this reasoning by one more step, we can see that satisfying the Bellman optimality equation \ref{} is, by construction of $B_{\mathbb{Q}}$, equivalent to $Q^{\pi} = B_{\mathbb{Q}}(Q^{\pi})$ in $\mathbb{Q}_{S,A}$. Thus we see the following implications hold true:
+
+\begin{equation}\label{eq_optimalImps}
+	\pi^* \text{ optimal } \implies \pi^* \text{ greedy } \implies Q^{\pi^*} \text{ is a fixed point of } B_{\mathbb{Q}}.
+\end{equation}
+
+A direct consequence of this is: if there is no fixed point of $B_{\mathbb{Q}}$, there can't be any optimal policy $\pi^*$. The good news is that not only does such a fixed point always exist, but it is also unique.
+
+\begin{prop}
+	Let $S$ and $A$ be finite state and action spaces, respectively. Then the operator $B_{\mathbb{Q}}$ has a unique fixed point $\mathbb{Q^*}$.
+\end{prop}
+
+A word of warning: Our notation $\mathbb{Q^*}$ heavily implies that we are dealing with the optimal policy's action value function. \textit{We have not shown this yet}. The implications in \ref{eq_optimalImps} are strictly one-way, and there is still some work to be done to link the fixed point of $B_{\mathbb{Q}}$ back to some optimal policy $\pi^*$.
+
+\begin{proof}
+	We will prove the claim by showing that $B_{\mathbb{Q}}$ is a contraction on $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$ and then apply the Banach Fixed Point Theorem (see appendix). In other words, we need to show 
+
+\begin{equation}
+	|B_{\mathbb{Q}}(Q_1) - B_{\mathbb{Q}}(Q_2)|_{\infty} < c \, |Q_1 - Q_2|_{\infty}
+\end{equation}
+
+for some $0 < c <1$ and any pair $Q_1,Q_2 \in \mathbb{Q}_{S,A}$. Applying 
+\end{proof}
 
 \end{document}
