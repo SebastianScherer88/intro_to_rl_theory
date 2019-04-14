@@ -74,6 +74,10 @@
 \begin{document}
 \maketitle
 
+\tableofcontents
+
+\newpage
+
 \section{Why another introduction?}
 
 The goal of this work is to provide a mathematically rigorous introduction to RL theory based on the excellent book "Introduction to reinforcement learning" by Sutton and Bartos (first edition). While I greatly enjoyed reading this book and appreciated its focused approach on developing an intuition for the Q- and V-functions, the algorithms and the general probabilistic framework introduced in the early chapters, I couldn't help but stumble at some points wondering how exactly a particular claim was justified. Queries on stack exchange as well as the various alternative resources applying even less rigour and, often times, introducing additional confusing notation, motivated me to  try and remedy this myself. I therefore set out to try and formalize the theory presented, at least for the finite Markov Decicions Processes treated in the book, so that it may help let my inner mathematician sleep at night, as well as, and this is my sincere hope, provide a rigorous and helpful introduction for all those who are not only interested in the intuition but also appreciate a firm foundation on which to place it. The following manuscript can be used as an explanatory guide to the concepts presented in the book, or can be independently used as a rigourous introduction to value function theory in its own right.
@@ -983,11 +987,11 @@ What does any of this have to do with our quest of finding and constructing (and
 
 A direct consequence of this is: if there is no fixed point of $B_{\mathbb{Q}}$, there can't be any optimal policy $\pi^*$. The good news is that not only does such a fixed point always exist, but it is also unique.
 
-\begin{prop}
-	Let $S$ and $A$ be finite state and action spaces, respectively. Then the operator $B_{\mathbb{Q}}$ has a unique fixed point $\mathbb{Q^*}$.
+\begin{prop}\label{prop_bellOpFixPoint}
+	Let $S$ and $A$ be finite state and action spaces, respectively. Then the operator $B_{\mathbb{Q}}$ has a unique fixed point $Q^*$.
 \end{prop}
 
-A word of warning: Our notation $\mathbb{Q^*}$ heavily implies that we are dealing with the optimal policy's action value function. \textit{We have not shown this yet}. The implications in \ref{eq_optimalImps} are strictly one-way, and there is still some work to be done to link the fixed point of $B_{\mathbb{Q}}$ back to some optimal policy $\pi^*$.
+A word of warning: Our notation $Q^*$ heavily implies that we are dealing with the optimal policy's action value function. \textit{We have not shown this yet}. The implications in \ref{eq_optimalImps} are strictly one-way, and there is still some work to be done to link the fixed point of $B_{\mathbb{Q}}$ back to some optimal policy $\pi^*$.
 
 \begin{proof}
 	We will prove the claim by showing that $B_{\mathbb{Q}}$ is a contraction on $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$ and then apply the Banach Fixed Point Theorem (see appendix). In other words, we need to show 
@@ -1019,6 +1023,89 @@ we see that
 \end{equation}
 
 Since $0 < \gamma < 1$, there is a $\gamma < c < 1$ such that equation \ref{eq_contrCond} holds, proving $B_{\mathbb{Q}}$ is a contraction on $(\mathbb{Q}_{S,A},|\cdot|_{\infty})$. By the Banach Fixed Point Theorem it has a unique fixed point $Q^* \in \mathbb{Q}_{S,A}$.
+
+\end{proof}
+
+\subsection{Building optimal policies}
+
+We are finally able to formulate this article's main result.
+
+\begin{thm}(Building optimal policies)\label{thm_optPolConstr}
+	Let $\pi_0 \in \Pi$ be an arbitrary (deterministic or probabilistic) policy for a given finite MDP. For $i=1,\dots$, iteratively put
+
+	\begin{equation}\label{eq_greedPolImpConst}
+		\pi_{i}(s,a) :=	\begin{cases}
+							1, 	&	 a = a_i,  i = \min\{j| a_j \in maxact^{Q^{\pi_{i-1}}}(s)\} \\
+							0 ,	&	\text{ otherwise}. \\ 
+						\end{cases}
+	\end{equation}
+
+	Then there exists an $N \in \mathbb{N}$ such that the following hold:
+
+	\begin{enumerate}
+		\item $\pi_{i-1} <_V \pi_{i}$ for $i=1,\dots,N$
+		\item $\pi_{N} =_V \pi_{j}$ for $j=N,\dots,$
+		\item $\pi_N = \pi^*$, i.e. $\pi_N$ is optimal
+	\end{enumerate}
+
+\end{thm}
+
+The notation of the first case in \ref{eq_greedPolImpConst} refers to the ordering of the states $(a_1,\dots,a_{|A|}) = A$ already mentioned earlier. While the ordering is arbitrary and not required, we refer to it here to formulate our policy improvement algorithm in a closed, succinct form. What we mean to say is to really only chose the 'first' (w.r.t our abritrary ordering on $A$) action in $maxact^{Q^{\pi_{i-1}}}(s)$ and to ignore all other actions, even if $|maxact^{Q^{\pi_{i-1}}}(s)| > 1$. This way, we remain in the space of $\textit{deterministic}$ policies.
+
+\begin{proof}
+	The first two points are a result of repeatedly applying Lemma \ref{lem_greedPolImp}. By construction \ref{eq_greedPolImpConst}, for all $i=1,\cdots$, the $i$-th policy $\pi_i$ is $Q^{\pi_{i-1}}$-greedy, implying
+
+	\begin{equation}
+		\pi_i >_V \pi_{i-1}
+	\end{equation}
+
+\textit{unless} $\pi_{i-1}$ is ($Q^{\pi_{i-1}}$)-greedy, too, in which case
+
+	\begin{equation}
+		\pi_i =_V  \pi_{i-1}.
+	\end{equation}
+
+	This implies that the above iteration stops generating improved policies \textit{if and only if} a greedy policy is generated. Let us denote the first time this happens by index $N$. Since $n_{S,A} = |S| \cdot |A| < \infty$, there are only a finite number of deterministic policies at our disposal. Since the sequence of policies 
+
+\begin{equation}
+	\pi_0 <_V \pi_1 < \dots < \pi_{N-1} < \pi_N
+\end{equation}
+
+more generally implies
+
+\begin{equation}
+	\pi_0 \neq \pi_1 \neq \dots \neq \pi_{N-1} \neq \pi_N,
+\end{equation}
+
+we are essentially drawing without replacement from a finite pot of policies until $\pi_N$ is reached and the sequence stagnates. Thus, the greedy policy break criteria has to be reached in a finite number of steps $N \le n_{S,A} < \infty$.
+
+ What is left to show is that $\pi_N$ is actually optimal. We will do this by a proof of contradiction.
+
+If $\pi_N$ is not optimal, there must be at least one other policy $\pi_{imp} \in \Pi$ for which
+
+\begin{equation}
+	\pi_{imp} >_V \pi_N
+\end{equation}
+
+holds true. If $\pi_{imp}$ itself is not greedy, we can apply the above iteration to $\pi_0 = \pi_{imp}$ to obtain a second greedy policy, $\pi_{imp,N_{imp}}$ satisfying
+
+\begin{equation}
+	\pi_N <_V \pi_{imp,N_{imp}}.
+\end{equation}
+
+By Corollary \ref{cor_greedPolVals}, this implies
+
+\begin{equation}
+	\max\limits_{a \in A} Q^{\pi_N}(s,a) < \max\limits_{a \in A} Q^{\pi_{imp,N_{imp}}}(s,a)
+\end{equation}
+
+for at least one $s \in S$, and, more generally,
+
+\begin{equation}
+	Q^{\pi_N} \neq Q^{\pi_{imp,N_{imp}}}.
+\end{equation}
+
+But both $Q^{\pi_N}$ and $Q^{\pi_{imp,N_{imp}}}$ are fixed points of $B_{\mathbb{Q}}$, which only has one fixed point by Proposition \ref{prop_bellOpFixPoint}. This contradiction implies that $\pi_N$ must have been optimal, and the proof is complete.
 
 \end{proof}
 
